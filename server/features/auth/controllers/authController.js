@@ -1,18 +1,22 @@
+
 import {
   registerCustomer,
-} from "../services/authService.js";
-import {
   verifyEmail,
-} from "../services/authService.js";
-import {
-  validateRegisterInput,
-} from "../validation/authValidation.js";
-import {
-  validateLoginInput,
-} from "../validation/authValidation.js";
-import {
+  loginUser,
   getCurrentUser,
 } from "../services/authService.js";
+
+import {
+  validateRegisterInput,
+  validateLoginInput,
+} from "../validation/authValidation.js";
+
+
+/**
+ * =========================
+ * REGISTER
+ * =========================
+ */
 export const register = async (
   req,
   res,
@@ -62,11 +66,12 @@ export const register = async (
       success: true,
 
       message:
-        "Account created successfully. Please check your email to verify your account.",
+        "Account created successfully",
 
       data: {
         user: {
-          id: result.user._id,
+          id:
+            result.user._id,
 
           email:
             result.user.email,
@@ -90,8 +95,17 @@ export const register = async (
 };
 
 
+/**
+ * =========================
+ * VERIFY EMAIL
+ * =========================
+ */
 export const verifyEmailController =
-  async (req, res, next) => {
+  async (
+    req,
+    res,
+    next
+  ) => {
     try {
       const {
         token,
@@ -119,7 +133,13 @@ export const verifyEmailController =
     }
   };
 
-  export const login = async (
+
+/**
+ * =========================
+ * LOGIN
+ * =========================
+ */
+export const login = async (
   req,
   res,
   next
@@ -208,6 +228,12 @@ export const verifyEmailController =
   }
 };
 
+
+/**
+ * =========================
+ * GET ME
+ * =========================
+ */
 export const getMe = async (
   req,
   res,
@@ -237,7 +263,8 @@ export const getMe = async (
             result.user.isActive,
 
           emailVerifiedAt:
-            result.user.emailVerifiedAt,
+            result.user
+              .emailVerifiedAt,
         },
 
         customer:
@@ -249,6 +276,12 @@ export const getMe = async (
   }
 };
 
+
+/**
+ * =========================
+ * LOGOUT
+ * =========================
+ */
 export const logout = (
   req,
   res

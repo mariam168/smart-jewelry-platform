@@ -1,20 +1,31 @@
+
 import User from "../models/User.js";
 import Customer from "../models/Customer.js";
 import Role from "../models/Role.js";
 
+// مهم جدًا: لازم يتسجل الموديل قبل استخدام populate
+import "../models/Permission.js";
+
 import {
   hashPassword,
+  comparePassword,
 } from "../utils/password.js";
-import {
-  sendVerificationEmail,
-} from "./emailService.js";
+
 import {
   generateRandomToken,
   hashToken,
 } from "../utils/token.js";
+
 import {
   generateAccessToken,
 } from "../utils/jwt.js";
+
+
+/**
+ * =========================
+ * REGISTER CUSTOMER
+ * =========================
+ */
 export const registerCustomer = async ({
   firstName,
   lastName,
@@ -27,10 +38,11 @@ export const registerCustomer = async ({
   const normalizedEmail =
     email.trim().toLowerCase();
 
-  // 1. Check if email already exists
-  const existingUser = await User.findOne({
-    email: normalizedEmail,
-  });
+  // Check existing user
+  const existingUser =
+    await User.findOne({
+      email: normalizedEmail,
+    });
 
   if (existingUser) {
     const error = new Error(
@@ -42,10 +54,11 @@ export const registerCustomer = async ({
     throw error;
   }
 
-  // 2. Find customer role
-  const customerRole = await Role.findOne({
-    name: "customer",
-  });
+  // Find customer role
+  const customerRole =
+    await Role.findOne({
+      name: "customer",
+    });
 
   if (!customerRole) {
     const error = new Error(
@@ -57,11 +70,11 @@ export const registerCustomer = async ({
     throw error;
   }
 
-  // 3. Hash password
+  // Hash password
   const passwordHash =
     await hashPassword(password);
 
-  // 4. Generate verification token
+  // Generate verification token
   const verificationToken =
     generateRandomToken();
 
@@ -70,33 +83,43 @@ export const registerCustomer = async ({
 
   const verificationExpiresAt =
     new Date(
-      Date.now() + 24 * 60 * 60 * 1000
+      Date.now() +
+        24 *
+          60 *
+          60 *
+          1000
     );
 
-  // 5. Create User
-  const user = await User.create({
-    email: normalizedEmail,
-    passwordHash,
-    role: customerRole._id,
+  // Create user
+  const user =
+    await User.create({
+      email: normalizedEmail,
 
-    emailVerificationTokenHash:
-      verificationTokenHash,
+      passwordHash,
 
-    emailVerificationExpiresAt:
-      verificationExpiresAt,
-  });
+      role: customerRole._id,
+
+      emailVerificationTokenHash:
+        verificationTokenHash,
+
+      emailVerificationExpiresAt:
+        verificationExpiresAt,
+    });
 
   try {
-    // 6. Create Customer
+    // Create customer
     const customer =
       await Customer.create({
         user: user._id,
 
-        firstName: firstName.trim(),
+        firstName:
+          firstName.trim(),
 
-        lastName: lastName.trim(),
+        lastName:
+          lastName.trim(),
 
-        phone: phone?.trim() || "",
+        phone:
+          phone?.trim() || "",
 
         privacyConsent,
 
@@ -108,11 +131,11 @@ export const registerCustomer = async ({
       user,
       customer,
 
-      // Temporary for development
+      // Development only
       verificationToken,
     };
   } catch (error) {
-    // Rollback User if Customer creation fails
+    // Rollback user
     await User.findByIdAndDelete(
       user._id
     );
@@ -122,6 +145,11 @@ export const registerCustomer = async ({
 };
 
 
+/**
+ * =========================
+ * VERIFY EMAIL
+ * =========================
+ */
 export const verifyEmail = async (
   token
 ) => {
@@ -172,6 +200,12 @@ export const verifyEmail = async (
   return user;
 };
 
+
+/**
+ * =========================
+ * LOGIN USER
+ * =========================
+ */
 export const loginUser = async ({
   email,
   password,
@@ -184,8 +218,10 @@ export const loginUser = async ({
       email: normalizedEmail,
     }).populate({
       path: "role",
+
       populate: {
         path: "permissions",
+        model: "Permission",
       },
     });
 
@@ -209,6 +245,7 @@ export const loginUser = async ({
     throw error;
   }
 
+  // Check password
   const isPasswordValid =
     await comparePassword(
       password,
@@ -225,6 +262,9 @@ export const loginUser = async ({
     throw error;
   }
 
+  // مؤقتًا لو أنتِ عايزة تلغي تفعيل الإيميل
+  // احذفي أو علقي الجزء ده
+  /*
   if (!user.emailVerifiedAt) {
     const error = new Error(
       "Please verify your email before logging in"
@@ -234,6 +274,7 @@ export const loginUser = async ({
 
     throw error;
   }
+  */
 
   user.lastLoginAt =
     new Date();
@@ -242,9 +283,11 @@ export const loginUser = async ({
 
   const accessToken =
     generateAccessToken({
-      userId: user._id.toString(),
+      userId:
+        user._id.toString(),
 
-      role: user.role.name,
+      role:
+        user.role.name,
     });
 
   return {
@@ -254,18 +297,31 @@ export const loginUser = async ({
   };
 };
 
+
+/**
+ * =========================
+ * GET CURRENT USER
+ * =========================
+ */
 export const getCurrentUser =
   async (userId) => {
     const user =
-      await User.findById(userId)
+      await User.findById(
+        userId
+      )
         .populate({
           path: "role",
+
           populate: {
             path: "permissions",
+
+            model: "Permission",
           },
         })
         .select(
-          "-passwordHash -emailVerificationTokenHash -emailVerificationExpiresAt"
+          "-passwordHash " +
+          "-emailVerificationTokenHash " +
+          "-emailVerificationExpiresAt"
         );
 
     if (!user) {
@@ -285,6 +341,7 @@ export const getCurrentUser =
 
     return {
       user,
+
       customer,
     };
   };
