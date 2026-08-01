@@ -8,6 +8,14 @@ createBrowserRouter,
 
 import MainLayout
 from "../components/layout/MainLayout";
+import AdminCategoriesPage
+from "../features/admin/pages/AdminCategoriesPage";
+
+import AddCategoryPage
+from "../features/admin/pages/AddCategoryPage";
+
+import EditCategoryPage
+from "../features/admin/pages/EditCategoryPage";
 
 // ==========================================
 // Authentication
@@ -248,7 +256,19 @@ createBrowserRouter([
       path: "products/new",
       element: <AddProductPage />,
     },
+{
+  path: "categories",
+  element: <AdminCategoriesPage />,
+},
+{
+  path: "categories/new",
+  element: <AddCategoryPage />,
+},
 
+{
+  path: "categories/:id/edit",
+  element: <EditCategoryPage />,
+},
     // Orders
     {
       path: "orders",

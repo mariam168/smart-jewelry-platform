@@ -17,16 +17,11 @@ const productSchema =
         trim: true,
       },
 
-      category: {
-        type: String,
-        required: true,
-        enum: [
-          "Bracelet",
-          "Necklace",
-          "Ring",
-          "Other",
-        ],
-      },
+      category:{
+    type:mongoose.Schema.Types.ObjectId,
+    ref:"Category",
+    required:true
+},
 
       price: {
         type: Number,

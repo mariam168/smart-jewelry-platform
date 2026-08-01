@@ -24,7 +24,11 @@ const menuItems = [
       "/admin/products",
   },
 
+{
+label:"Categories",
 
+path:"/admin/categories",
+},
   {
     label:
       "Orders",

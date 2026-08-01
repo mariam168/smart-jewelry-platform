@@ -1,4 +1,3 @@
-
 import {
   useEffect,
   useState,
@@ -13,7 +12,6 @@ import {
   deleteProduct,
 } from "../services/productApi";
 
-
 const AdminProductsPage = () => {
 
   const [
@@ -21,18 +19,15 @@ const AdminProductsPage = () => {
     setProducts,
   ] = useState([]);
 
-
   const [
     isLoading,
     setIsLoading,
   ] = useState(true);
 
-
   const [
     error,
     setError,
   ] = useState("");
-
 
   const loadProducts =
     async () => {
@@ -43,29 +38,25 @@ const AdminProductsPage = () => {
 
         setError("");
 
-
         const response =
           await getProducts();
-
 
         setProducts(
           response.data.products
         );
 
-
       } catch (error) {
 
-        console.error(
-          error
-        );
-
+        console.error(error);
 
         setError(
+
           error?.response
             ?.data
             ?.message ||
 
           "Failed to load products."
+
         );
 
       } finally {
@@ -73,15 +64,14 @@ const AdminProductsPage = () => {
         setIsLoading(false);
 
       }
-    };
 
+    };
 
   useEffect(() => {
 
     loadProducts();
 
   }, []);
-
 
   const handleDelete =
     async (productId) => {
@@ -91,11 +81,7 @@ const AdminProductsPage = () => {
           "Are you sure you want to delete this product?"
         );
 
-
-      if (!confirmed) {
-        return;
-      }
-
+      if (!confirmed) return;
 
       try {
 
@@ -103,42 +89,32 @@ const AdminProductsPage = () => {
           productId
         );
 
-
-        setProducts(
-          (previousProducts) =>
-            previousProducts.filter(
-              (product) =>
-                product._id !==
-                productId
-            )
+        setProducts(previous =>
+          previous.filter(
+            product =>
+              product._id !== productId
+          )
         );
-
 
       } catch (error) {
 
-        console.error(
-          error
-        );
-
-
         alert(
+
           error?.response
             ?.data
             ?.message ||
 
-          "Failed to delete product."
+          "Delete failed."
+
         );
 
       }
-    };
 
+    };
 
   return (
 
     <div className="min-h-screen bg-gray-50">
-
-
-      {/* Header */}
 
       <header className="border-b bg-white">
 
@@ -146,20 +122,19 @@ const AdminProductsPage = () => {
 
           <div>
 
-            <h1 className="text-2xl font-bold text-gray-900">
+            <h1 className="text-2xl font-bold">
               Products
             </h1>
 
             <p className="mt-1 text-sm text-gray-500">
-              Manage your Smart Jewelry products
+              Manage your jewelry products
             </p>
 
           </div>
 
-
           <Link
             to="/admin/products/new"
-            className="rounded-lg bg-black px-5 py-3 text-sm font-semibold text-white hover:bg-gray-800"
+            className="rounded-lg bg-black px-5 py-3 text-white"
           >
             Add Product
           </Link>
@@ -168,15 +143,11 @@ const AdminProductsPage = () => {
 
       </header>
 
-
-      {/* Content */}
-
       <main className="mx-auto max-w-7xl px-6 py-10">
-
 
         {error && (
 
-          <div className="mb-6 rounded-lg border border-red-200 bg-red-50 p-4 text-sm text-red-600">
+          <div className="mb-6 rounded-lg bg-red-50 p-4 text-red-600">
 
             {error}
 
@@ -184,70 +155,65 @@ const AdminProductsPage = () => {
 
         )}
 
-
         {isLoading ? (
 
-          <div className="py-20 text-center text-gray-500">
+          <div className="py-20 text-center">
 
-            Loading products...
+            Loading...
 
           </div>
 
         ) : products.length === 0 ? (
 
-          <div className="rounded-xl border border-gray-200 bg-white p-10 text-center">
+          <div className="rounded-xl border bg-white p-10 text-center">
 
-            <h2 className="text-xl font-semibold text-gray-900">
-              No Products Yet
+            <h2 className="text-xl font-semibold">
+
+              No Products
+
             </h2>
 
-            <p className="mt-2 text-sm text-gray-500">
-              Start by adding your first jewelry product.
+            <p className="mt-2 text-gray-500">
+
+              Add your first product.
+
             </p>
-
-
-            <Link
-              to="/admin/products/new"
-              className="mt-6 inline-block rounded-lg bg-black px-6 py-3 text-sm font-semibold text-white"
-            >
-              Add Your First Product
-            </Link>
 
           </div>
 
         ) : (
 
-          <div className="overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm">
+          <div className="overflow-hidden rounded-xl border bg-white shadow">
 
             <div className="overflow-x-auto">
 
               <table className="w-full text-left">
 
-                <thead className="border-b bg-gray-50">
+                <thead className="bg-gray-50 border-b">
 
                   <tr>
 
-                    <th className="px-6 py-4 text-sm font-semibold text-gray-700">
+                    <th className="px-6 py-4">
                       Product
                     </th>
 
-                    <th className="px-6 py-4 text-sm font-semibold text-gray-700">
+                    <th className="px-6 py-4">
                       Category
                     </th>
 
-                    <th className="px-6 py-4 text-sm font-semibold text-gray-700">
+                    <th className="px-6 py-4">
                       Price
                     </th>
 
-                    <th className="px-6 py-4 text-sm font-semibold text-gray-700">
+                    <th className="px-6 py-4">
                       Stock
                     </th>
 
-                    <th className="px-6 py-4 text-sm font-semibold text-gray-700">
+                    <th className="px-6 py-4">
                       Status
                     </th>
 
-                    <th className="px-6 py-4 text-sm font-semibold text-gray-700">
+                    <th className="px-6 py-4">
                       Actions
                     </th>
 
@@ -255,97 +221,96 @@ const AdminProductsPage = () => {
 
                 </thead>
 
+                <tbody>
 
-                <tbody className="divide-y">
+                  {products.map(product => (
 
-                  {products.map(
-                    (product) => (
+                    <tr
+                      key={product._id}
+                      className="border-b hover:bg-gray-50"
+                    >
 
-                      <tr
-                        key={
-                          product._id
-                        }
-                        className="hover:bg-gray-50"
-                      >
+                      <td className="px-6 py-4">
 
-                        <td className="px-6 py-4">
+                        <div className="font-medium">
 
-                          <div className="font-medium text-gray-900">
-                            {
-                              product.name
-                            }
-                          </div>
+                          {product.name}
 
-                          <div className="mt-1 max-w-xs truncate text-sm text-gray-500">
-                            {
-                              product.description
-                            }
-                          </div>
+                        </div>
 
-                        </td>
+                        <div className="text-sm text-gray-500 truncate max-w-xs">
 
+                          {product.description}
 
-                        <td className="px-6 py-4 text-sm text-gray-600">
+                        </div>
 
-                          {
-                            product.category
-                          }
+                      </td>
 
-                        </td>
+                      <td className="px-6 py-4">
 
+                        {product.category?.name}
 
-                        <td className="px-6 py-4 text-sm font-medium text-gray-900">
+                      </td>
 
-                          $
-                          {
-                            product.price
-                          }
+                      <td className="px-6 py-4">
 
-                        </td>
+                        {product.price} EGP
 
+                      </td>
 
-                        <td className="px-6 py-4 text-sm text-gray-600">
+                      <td className="px-6 py-4">
 
-                          {
-                            product.stock
-                          }
+                        {product.stock}
 
-                        </td>
+                      </td>
 
+                      <td className="px-6 py-4">
 
-                        <td className="px-6 py-4">
+                        <span
+                          className={`rounded-full px-3 py-1 text-xs font-medium ${
+                            product.status === "active"
 
-                          <span className="rounded-full bg-green-100 px-3 py-1 text-xs font-medium text-green-700">
+                              ? "bg-green-100 text-green-700"
 
-                            {
-                              product.status
-                            }
+                              : "bg-red-100 text-red-700"
+                          }`}
+                        >
 
-                          </span>
+                          {product.status}
 
-                        </td>
+                        </span>
 
+                      </td>
 
-                        <td className="px-6 py-4">
+                      <td className="px-6 py-4">
+
+                        <div className="flex gap-4">
+
+                          <Link
+                            to={`/admin/products/${product._id}/edit`}
+                            className="text-blue-600 hover:text-blue-800"
+                          >
+                            Edit
+                          </Link>
 
                           <button
-                            type="button"
                             onClick={() =>
                               handleDelete(
                                 product._id
                               )
                             }
-                            className="text-sm font-medium text-red-600 hover:text-red-800"
+                            className="text-red-600 hover:text-red-800"
                           >
                             Delete
                           </button>
 
-                        </td>
+                        </div>
 
-                      </tr>
+                      </td>
 
-                    )
-                  )}
+                    </tr>
+
+                  ))}
 
                 </tbody>
 
@@ -362,7 +327,7 @@ const AdminProductsPage = () => {
     </div>
 
   );
-};
 
+};
 
 export default AdminProductsPage;

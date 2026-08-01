@@ -1,43 +1,56 @@
 
 import Product from "../models/Product.js";
 
+import Category from "../models/Category.js";
 
-export const createProduct =
-  async (productData) => {
 
-    const product =
-      await Product.create(
-        productData
-      );
+export const createProduct = async (productData) => {
 
-    return product;
-  };
+  const category =
+    await Category.findById(
+      productData.category
+    );
+
+  if (!category) {
+    const error = new Error(
+      "Category not found."
+    );
+
+    error.statusCode = 404;
+
+    throw error;
+  }
+
+  const product =
+    await Product.create(
+      productData
+    );
+
+  return product;
+};
 
 
 export const getAllProducts =
-  async () => {
+async()=>{
 
-    const products =
-      await Product.find()
-        .sort({
-          createdAt: -1,
-        });
+return await Product.find()
 
-    return products;
-  };
+.populate("category")
 
+.sort({
+createdAt:-1
+});
+
+};
 
 export const getProductById =
-  async (productId) => {
+async(productId)=>{
 
-    const product =
-      await Product.findById(
-        productId
-      );
+return await Product.findById(productId)
 
-    return product;
-  };
+.populate("category");
 
+};
 
 export const updateProduct =
   async (

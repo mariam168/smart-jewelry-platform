@@ -1,148 +1,165 @@
+import {
+  useEffect,
+  useState,
+} from "react";
 
-import { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
-
+import {
+  Link,
+  useNavigate,
+} from "react-router-dom";
 
 import {
   createProduct,
 } from "../services/productApi";
 
+import {
+  getCategories,
+} from "../services/categoryApi";
 
 const AddProductPage = () => {
 
   const navigate =
     useNavigate();
 
+  const [
+    categories,
+    setCategories,
+  ] = useState([]);
 
-  const [formData, setFormData] =
-    useState({
-      name: "",
-      description: "",
-      category: "Bracelet",
-      price: "",
-      stock: "",
-      status: "active",
-    });
+  const [
+    formData,
+    setFormData,
+  ] = useState({
+    name: "",
+    description: "",
+    category: "",
+    price: "",
+    stock: "",
+    status: "active",
+  });
 
+  const [
+    isLoading,
+    setIsLoading,
+  ] = useState(false);
 
-  const [isLoading, setIsLoading] =
-    useState(false);
+  const [
+    error,
+    setError,
+  ] = useState("");
 
+  useEffect(() => {
 
-  const [error, setError] =
-    useState("");
+    const loadCategories =
+      async () => {
 
+        try {
 
-  const handleChange = (
-    event
-  ) => {
+          const response =
+            await getCategories();
 
-    const {
-      name,
-      value,
-    } = event.target;
+          const data =
+            response.data.categories;
 
+          setCategories(data);
 
-    setFormData(
-      (previousData) => ({
-        ...previousData,
+          if (data.length > 0) {
 
-        [name]:
-          value,
-      })
-    );
-  };
+            setFormData(previous => ({
+              ...previous,
+              category:
+                data[0]._id,
+            }));
 
+          }
 
+        } catch (error) {
 
-const handleSubmit = async (
-  event
-) => {
+          console.error(error);
 
-  event.preventDefault();
+        }
 
-  setError("");
+      };
 
-  setIsLoading(true);
+    loadCategories();
 
+  }, []);
 
-  try {
+  const handleChange =
+    (event) => {
 
-    const productData = {
+      const {
+        name,
+        value,
+      } = event.target;
 
-      name:
-        formData.name,
-
-      description:
-        formData.description,
-
-      category:
-        formData.category,
-
-      price:
-        Number(
-          formData.price
-        ),
-
-      stock:
-        Number(
-          formData.stock
-        ),
-
-      status:
-        formData.status,
+      setFormData(previous => ({
+        ...previous,
+        [name]: value,
+      }));
 
     };
 
+  const handleSubmit =
+    async (event) => {
 
-    const response =
-      await createProduct(
-        productData
-      );
+      event.preventDefault();
 
+      setError("");
 
-    console.log(
-      "Product Created:",
-      response
-    );
+      setIsLoading(true);
 
+      try {
 
-    navigate(
-      "/admin/products"
-    );
+        await createProduct({
 
+          name:
+            formData.name,
 
-  } catch (error) {
+          description:
+            formData.description,
 
-    console.error(
-      "Create Product Error:",
-      error
-    );
+          category:
+            formData.category,
 
+          price:
+            Number(formData.price),
 
-    setError(
+          stock:
+            Number(formData.stock),
 
-      error?.response
-        ?.data
-        ?.message ||
+          status:
+            formData.status,
 
-      "Failed to create product. Please try again."
+        });
 
-    );
+        navigate(
+          "/admin/products"
+        );
 
-  } finally {
+      } catch (error) {
 
-    setIsLoading(false);
+        setError(
 
-  }
-};
+          error?.response
+            ?.data
+            ?.message ||
 
+          "Failed to create product."
 
+        );
+
+      } finally {
+
+        setIsLoading(false);
+
+      }
+
+    };
 
   return (
-    <div className="min-h-screen bg-gray-50">
 
-      {/* Header */}
+    <div className="min-h-screen bg-gray-50">
 
       <header className="border-b bg-white">
 
@@ -150,38 +167,34 @@ const handleSubmit = async (
 
           <div>
 
-            <h1 className="text-2xl font-bold text-gray-900">
+            <h1 className="text-2xl font-bold">
               Add Product
             </h1>
 
             <p className="mt-1 text-sm text-gray-500">
-              Create a new jewelry product
+              Create a new product
             </p>
 
           </div>
 
-
           <Link
             to="/admin/products"
-            className="rounded-lg border border-gray-300 bg-white px-5 py-3 text-sm font-medium text-gray-700 transition hover:bg-gray-50"
+            className="rounded-lg border px-5 py-3"
           >
-            Back to Products
+            Back
           </Link>
 
         </div>
 
       </header>
 
-
-      {/* Form */}
-
       <main className="mx-auto max-w-5xl px-6 py-10">
 
-        <div className="rounded-xl border border-gray-200 bg-white p-8 shadow-sm">
+        <div className="rounded-xl border bg-white p-8">
 
           {error && (
 
-            <div className="mb-6 rounded-lg border border-red-200 bg-red-50 p-4 text-sm text-red-600">
+            <div className="mb-5 rounded-lg bg-red-50 p-4 text-red-600">
 
               {error}
 
@@ -189,175 +202,125 @@ const handleSubmit = async (
 
           )}
 
-
           <form
-            onSubmit={
-              handleSubmit
-            }
+            onSubmit={handleSubmit}
             className="space-y-6"
           >
 
-            {/* Product Name */}
-
             <div>
 
-              <label className="mb-2 block text-sm font-medium text-gray-700">
+              <label className="mb-2 block">
                 Product Name
               </label>
 
               <input
-                type="text"
+                className="w-full rounded-lg border px-4 py-3"
                 name="name"
-                value={
-                  formData.name
-                }
-                onChange={
-                  handleChange
-                }
-                placeholder="Example: Elegant NFC Bracelet"
+                value={formData.name}
+                onChange={handleChange}
                 required
-                className="w-full rounded-lg border border-gray-300 px-4 py-3 outline-none transition focus:border-black"
               />
 
             </div>
 
-
-            {/* Description */}
-
             <div>
 
-              <label className="mb-2 block text-sm font-medium text-gray-700">
+              <label className="mb-2 block">
                 Description
               </label>
 
               <textarea
+                rows={5}
+                className="w-full rounded-lg border px-4 py-3"
                 name="description"
-                value={
-                  formData.description
-                }
-                onChange={
-                  handleChange
-                }
-                placeholder="Describe the product..."
-                rows="5"
+                value={formData.description}
+                onChange={handleChange}
                 required
-                className="w-full rounded-lg border border-gray-300 px-4 py-3 outline-none transition focus:border-black"
               />
 
             </div>
 
-
-            {/* Category */}
-
             <div>
 
-              <label className="mb-2 block text-sm font-medium text-gray-700">
+              <label className="mb-2 block">
                 Category
               </label>
 
               <select
+                className="w-full rounded-lg border px-4 py-3"
                 name="category"
-                value={
-                  formData.category
-                }
-                onChange={
-                  handleChange
-                }
-                className="w-full rounded-lg border border-gray-300 bg-white px-4 py-3 outline-none focus:border-black"
+                value={formData.category}
+                onChange={handleChange}
               >
 
-                <option value="Bracelet">
-                  Bracelet
-                </option>
+                {categories.map(category => (
 
-                <option value="Necklace">
-                  Necklace
-                </option>
+                  <option
+                    key={category._id}
+                    value={category._id}
+                  >
 
-                <option value="Ring">
-                  Ring
-                </option>
+                    {category.name}
 
-                <option value="Other">
-                  Other
-                </option>
+                  </option>
+
+                ))}
 
               </select>
 
             </div>
 
-
-            {/* Price and Stock */}
-
             <div className="grid gap-6 sm:grid-cols-2">
 
               <div>
 
-                <label className="mb-2 block text-sm font-medium text-gray-700">
+                <label className="mb-2 block">
                   Price
                 </label>
 
                 <input
                   type="number"
-                  name="price"
-                  value={
-                    formData.price
-                  }
-                  onChange={
-                    handleChange
-                  }
-                  placeholder="0.00"
                   min="0"
+                  className="w-full rounded-lg border px-4 py-3"
+                  name="price"
+                  value={formData.price}
+                  onChange={handleChange}
                   required
-                  className="w-full rounded-lg border border-gray-300 px-4 py-3 outline-none focus:border-black"
                 />
 
               </div>
 
-
               <div>
 
-                <label className="mb-2 block text-sm font-medium text-gray-700">
+                <label className="mb-2 block">
                   Stock
                 </label>
 
                 <input
                   type="number"
-                  name="stock"
-                  value={
-                    formData.stock
-                  }
-                  onChange={
-                    handleChange
-                  }
-                  placeholder="0"
                   min="0"
+                  className="w-full rounded-lg border px-4 py-3"
+                  name="stock"
+                  value={formData.stock}
+                  onChange={handleChange}
                   required
-                  className="w-full rounded-lg border border-gray-300 px-4 py-3 outline-none focus:border-black"
                 />
 
               </div>
 
             </div>
 
-
-            {/* Status */}
-
             <div>
 
-              <label className="mb-2 block text-sm font-medium text-gray-700">
+              <label className="mb-2 block">
                 Status
               </label>
 
               <select
+                className="w-full rounded-lg border px-4 py-3"
                 name="status"
-                value={
-                  formData.status
-                }
-                onChange={
-                  handleChange
-                }
-                className="w-full rounded-lg border border-gray-300 bg-white px-4 py-3 outline-none focus:border-black"
+                value={formData.status}
+                onChange={handleChange}
               >
 
                 <option value="active">
@@ -372,25 +335,19 @@ const handleSubmit = async (
 
             </div>
 
-
-            {/* Actions */}
-
-            <div className="flex items-center justify-end gap-4 border-t pt-6">
+            <div className="flex justify-end gap-4 border-t pt-6">
 
               <Link
                 to="/admin/products"
-                className="rounded-lg border border-gray-300 px-6 py-3 text-sm font-medium text-gray-700 hover:bg-gray-50"
+                className="rounded-lg border px-6 py-3"
               >
                 Cancel
               </Link>
 
-
               <button
                 type="submit"
-                disabled={
-                  isLoading
-                }
-                className="rounded-lg bg-black px-6 py-3 text-sm font-semibold text-white transition hover:bg-gray-800 disabled:cursor-not-allowed disabled:opacity-50"
+                disabled={isLoading}
+                className="rounded-lg bg-black px-6 py-3 text-white"
               >
 
                 {isLoading
@@ -408,8 +365,9 @@ const handleSubmit = async (
       </main>
 
     </div>
-  );
-};
 
+  );
+
+};
 
 export default AddProductPage;

@@ -11,9 +11,10 @@ import dashboardRoutes from "./features/admin/routes/dashboardRoutes.js";
 import adminAuthRoutes from "./features/admin/routes/adminRoutes.js";
 
 import productRoutes from "./features/catalog/routes/productRoutes.js";
-
+import categoryRoutes from "./features/catalog/routes/categoryRoutes.js";
 import cartRoutes from "./features/cart/routes/cartRoutes.js";
-
+import productVariantRoutes from "./features/catalog/routes/productVariantRoutes.js";
+import productImageRoutes from "./features/catalog/routes/productImageRoutes.js";
 
 const app = express();
 
@@ -68,11 +69,17 @@ app.use(
   cookieParser()
 );
 
-
+app.use(
+"/api/product-images",
+productImageRoutes
+);
 // ==========================================
 // ROOT ROUTE
 // ==========================================
-
+app.use(
+    "/api/categories",
+    categoryRoutes
+);
 app.get(
   "/",
   (req, res) => {
@@ -83,7 +90,10 @@ app.get(
     });
   }
 );
-
+app.use(
+"/api/product-variants",
+productVariantRoutes
+);
 
 // ==========================================
 // PRODUCT ROUTES
