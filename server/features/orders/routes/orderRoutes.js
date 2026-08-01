@@ -1,24 +1,30 @@
-
 import express from "express";
 
 import {
   createOrderController,
-  getOrders,
-  getOrder,
+  getMyOrders,
+  getMyOrderById,
+  getAdminOrders,
+  getAdminOrderById,
+  updateAdminOrderStatus,
 } from "../controllers/orderController.js";
 
 import {
   protect,
 } from "../../auth/middleware/authMiddleware.js";
 
+import adminMiddleware from "../../admin/middleware/adminMiddleware.js";
+
+
 const router =
   express.Router();
 
 
 // ==========================================
-// CREATE ORDER
+// CUSTOMER ROUTES
 // ==========================================
 
+// Create Order
 router.post(
   "/",
   protect,
@@ -26,25 +32,50 @@ router.post(
 );
 
 
-// ==========================================
-// GET USER ORDERS
-// ==========================================
-
+// Get My Orders
 router.get(
-  "/",
+  "/my-orders",
   protect,
-  getOrders
+  getMyOrders
+);
+
+
+// Get My Order By ID
+router.get(
+  "/my-orders/:id",
+  protect,
+  getMyOrderById
 );
 
 
 // ==========================================
-// GET SINGLE ORDER
+// ADMIN ROUTES
 // ==========================================
 
+// Get All Orders
 router.get(
-  "/:id",
+  "/admin",
   protect,
-  getOrder
+  adminMiddleware,
+  getAdminOrders
+);
+
+
+// Get Order By ID
+router.get(
+  "/admin/:id",
+  protect,
+  adminMiddleware,
+  getAdminOrderById
+);
+
+
+// Update Order Status
+router.patch(
+  "/admin/:id/status",
+  protect,
+  adminMiddleware,
+  updateAdminOrderStatus
 );
 
 

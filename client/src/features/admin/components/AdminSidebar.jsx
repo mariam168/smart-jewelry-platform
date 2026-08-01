@@ -5,27 +5,35 @@ import {
 
 
 const AdminSidebar = () => {
+const menuItems = [
 
-  const menuItems = [
+  {
+    label:
+      "Dashboard",
 
-    {
-      label:
-        "Dashboard",
+    path:
+      "/admin",
+  },
 
-      path:
-        "/admin",
-    },
 
-    {
-      label:
-        "Products",
+  {
+    label:
+      "Products",
 
-      path:
-        "/admin/products",
-    },
+    path:
+      "/admin/products",
+  },
 
-  ];
 
+  {
+    label:
+      "Orders",
+
+    path:
+      "/admin/orders",
+  },
+
+];
 
   return (
     <aside className="fixed left-0 top-0 hidden h-screen w-64 border-r bg-white lg:block">

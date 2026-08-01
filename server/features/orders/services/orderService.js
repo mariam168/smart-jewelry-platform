@@ -1,8 +1,23 @@
 
+import mongoose from "mongoose";
+
 import Order from "../models/Order.js";
 import Cart from "../../cart/models/Cart.js";
 import Product from "../../catalog/models/Product.js";
 
+// ==========================================
+// GENERATE ORDER NUMBER
+// ==========================================
+
+const generateOrderNumber = () => {
+  const timestamp = Date.now();
+
+  const random = Math.floor(
+    1000 + Math.random() * 9000
+  );
+
+  return `SJ-${timestamp}-${random}`;
+};
 
 // ==========================================
 // CREATE ORDER
@@ -11,25 +26,40 @@ import Product from "../../catalog/models/Product.js";
 export const createOrder = async (
   userId,
   {
-    fullName,
-    phone,
-    address,
-    city,
+    shippingAddress,
     paymentMethod = "cash_on_delivery",
   }
 ) => {
-  // ========================================
-  // 1. GET USER CART
-  // ========================================
+  // Validate User ID
+  if (
+    !mongoose.Types.ObjectId.isValid(userId)
+  ) {
+    const error = new Error(
+      "Invalid user ID"
+    );
 
-  const cart = await Cart.findOne({
-    user: userId,
-  }).populate({
-    path: "items.product",
-    select: "name price images",
-  });
+    error.statusCode = 400;
 
-  if (!cart || cart.items.length === 0) {
+    throw error;
+  }
+
+  // ==========================================
+  // GET USER CART
+  // ==========================================
+
+  const cart =
+    await Cart.findOne({
+      user: userId,
+    }).populate({
+      path: "items.product",
+      select: "name price images",
+    });
+
+  if (
+    !cart ||
+    !cart.items ||
+    cart.items.length === 0
+  ) {
     const error = new Error(
       "Your cart is empty"
     );
@@ -39,19 +69,20 @@ export const createOrder = async (
     throw error;
   }
 
-
-  // ========================================
-  // 2. VALIDATE SHIPPING DATA
-  // ========================================
+  // ==========================================
+  // VALIDATE SHIPPING ADDRESS
+  // ==========================================
 
   if (
-    !fullName ||
-    !phone ||
-    !address ||
-    !city
+    !shippingAddress ||
+    !shippingAddress.firstName ||
+    !shippingAddress.lastName ||
+    !shippingAddress.phone ||
+    !shippingAddress.address ||
+    !shippingAddress.city
   ) {
     const error = new Error(
-      "All shipping information is required"
+      "Complete shipping address is required"
     );
 
     error.statusCode = 400;
@@ -59,34 +90,57 @@ export const createOrder = async (
     throw error;
   }
 
+  // ==========================================
+  // VALIDATE PAYMENT METHOD
+  // ==========================================
 
-  // ========================================
-  // 3. PREPARE ORDER ITEMS
-  // ========================================
+  const allowedPaymentMethods = [
+    "cash_on_delivery",
+    "card",
+  ];
 
-  const orderItems = cart.items.map(
-    (item) => {
-      const product = item.product;
+  if (
+    !allowedPaymentMethods.includes(
+      paymentMethod
+    )
+  ) {
+    const error = new Error(
+      "Invalid payment method"
+    );
+
+    error.statusCode = 400;
+
+    throw error;
+  }
+
+  // ==========================================
+  // PREPARE ORDER ITEMS
+  // ==========================================
+
+  const orderItems =
+    cart.items.map((item) => {
+      const product =
+        item.product;
+
+      if (!product) {
+        throw new Error(
+          "One of the products in your cart no longer exists"
+        );
+      }
 
       return {
         product: product._id,
-
         name: product.name,
-
         price: product.price,
-
         quantity: item.quantity,
-
         image:
           product.images?.[0] || "",
       };
-    }
-  );
+    });
 
-
-  // ========================================
-  // 4. CALCULATE SUBTOTAL
-  // ========================================
+  // ==========================================
+  // CALCULATE SUBTOTAL
+  // ==========================================
 
   const subtotal =
     orderItems.reduce(
@@ -100,72 +154,80 @@ export const createOrder = async (
       0
     );
 
+  // ==========================================
+  // SHIPPING COST
+  // ==========================================
 
-  // ========================================
-  // 5. SHIPPING FEE
-  // ========================================
+  const shippingCost =
+    subtotal >= 1000
+      ? 0
+      : 50;
 
-  const shippingFee = 0;
-
-
-  // ========================================
-  // 6. TOTAL
-  // ========================================
+  // ==========================================
+  // TOTAL
+  // ==========================================
 
   const total =
-    subtotal + shippingFee;
+    subtotal +
+    shippingCost;
 
-
-  // ========================================
-  // 7. CREATE ORDER
-  // ========================================
+  // ==========================================
+  // CREATE ORDER
+  // ==========================================
 
   const order =
     await Order.create({
+      orderNumber:
+        generateOrderNumber(),
+
       user: userId,
 
       items: orderItems,
 
-      shippingAddress: {
-        fullName,
-        phone,
-        address,
-        city,
-      },
+      shippingAddress,
 
       paymentMethod,
 
+      paymentStatus:
+        "pending",
+
+      orderStatus:
+        "pending",
+
       subtotal,
 
-      shippingFee,
+      shippingCost,
 
       total,
-
-      status: "pending",
     });
 
-
-  // ========================================
-  // 8. CLEAR CART
-  // ========================================
+  // ==========================================
+  // CLEAR CART
+  // ==========================================
 
   cart.items = [];
 
   await cart.save();
 
+  // ==========================================
+  // RETURN POPULATED ORDER
+  // ==========================================
 
-  // ========================================
-  // 9. RETURN ORDER
-  // ========================================
+  const populatedOrder =
+    await Order.findById(
+      order._id
+    )
+      .populate(
+        "user",
+        "email"
+      )
+      .populate(
+        "items.product",
+        "name price images"
+      );
 
-  return Order.findById(
-    order._id
-  ).populate({
-    path: "items.product",
-    select: "name price images",
-  });
+  return populatedOrder;
 };
-
 
 // ==========================================
 // GET USER ORDERS
@@ -173,21 +235,23 @@ export const createOrder = async (
 
 export const getUserOrders =
   async (userId) => {
-    return Order.find({
-      user: userId,
-    })
-      .populate({
-        path: "items.product",
-        select: "name price images",
+    const orders =
+      await Order.find({
+        user: userId,
       })
-      .sort({
-        createdAt: -1,
-      });
+        .populate(
+          "items.product",
+          "name price images"
+        )
+        .sort({
+          createdAt: -1,
+        });
+
+    return orders;
   };
 
-
 // ==========================================
-// GET SINGLE ORDER
+// GET USER ORDER BY ID
 // ==========================================
 
 export const getUserOrderById =
@@ -195,14 +259,29 @@ export const getUserOrderById =
     userId,
     orderId
   ) => {
+    if (
+      !mongoose.Types.ObjectId.isValid(
+        orderId
+      )
+    ) {
+      const error = new Error(
+        "Invalid order ID"
+      );
+
+      error.statusCode = 400;
+
+      throw error;
+    }
+
     const order =
       await Order.findOne({
         _id: orderId,
         user: userId,
-      }).populate({
-        path: "items.product",
-        select: "name price images",
-      });
+      })
+        .populate(
+          "items.product",
+          "name price images"
+        );
 
     if (!order) {
       const error = new Error(
@@ -216,3 +295,154 @@ export const getUserOrderById =
 
     return order;
   };
+
+// ==========================================
+// ADMIN - GET ALL ORDERS
+// ==========================================
+
+export const getAllOrders =
+  async () => {
+    const orders =
+      await Order.find()
+        .populate(
+          "user",
+          "email"
+        )
+        .populate(
+          "items.product",
+          "name price images"
+        )
+        .sort({
+          createdAt: -1,
+        });
+
+    return orders;
+  };
+
+// ==========================================
+// ADMIN - GET ORDER BY ID
+// ==========================================
+
+export const getOrderById =
+  async (
+    orderId
+  ) => {
+    if (
+      !mongoose.Types.ObjectId.isValid(
+        orderId
+      )
+    ) {
+      const error = new Error(
+        "Invalid order ID"
+      );
+
+      error.statusCode = 400;
+
+      throw error;
+    }
+
+    const order =
+      await Order.findById(
+        orderId
+      )
+        .populate(
+          "user",
+          "email"
+        )
+        .populate(
+          "items.product",
+          "name price images"
+        );
+
+    if (!order) {
+      const error = new Error(
+        "Order not found"
+      );
+
+      error.statusCode = 404;
+
+      throw error;
+    }
+
+    return order;
+  };
+
+// ==========================================
+// ADMIN - UPDATE ORDER STATUS
+// ==========================================
+
+export const updateOrderStatus =
+  async (
+    orderId,
+    orderStatus
+  ) => {
+    const allowedStatuses = [
+      "pending",
+      "confirmed",
+      "processing",
+      "shipped",
+      "delivered",
+      "cancelled",
+    ];
+
+    if (
+      !allowedStatuses.includes(
+        orderStatus
+      )
+    ) {
+      const error = new Error(
+        "Invalid order status"
+      );
+
+      error.statusCode = 400;
+
+      throw error;
+    }
+
+    if (
+      !mongoose.Types.ObjectId.isValid(
+        orderId
+      )
+    ) {
+      const error = new Error(
+        "Invalid order ID"
+      );
+
+      error.statusCode = 400;
+
+      throw error;
+    }
+
+    const order =
+      await Order.findByIdAndUpdate(
+        orderId,
+        {
+          orderStatus,
+        },
+        {
+          new: true,
+          runValidators: true,
+        }
+      )
+        .populate(
+          "user",
+          "email"
+        )
+        .populate(
+          "items.product",
+          "name price images"
+        );
+
+    if (!order) {
+      const error = new Error(
+        "Order not found"
+      );
+
+      error.statusCode = 404;
+
+      throw error;
+    }
+
+    return order;
+  };
+

@@ -1,14 +1,105 @@
+import {
+  useEffect,
+  useState,
+} from "react";
+
+import {
+  getDashboardStats,
+} from "../services/dashboardApi";
+
 
 const AdminDashboardPage = () => {
 
-  const stats = [
+  const [
+    stats,
+    setStats,
+  ] = useState({
+
+    totalProducts: 0,
+
+    totalOrders: 0,
+
+    totalCustomers: 0,
+
+    pendingOrders: 0,
+
+  });
+
+
+  const [
+    isLoading,
+    setIsLoading,
+  ] = useState(true);
+
+
+  const [
+    error,
+    setError,
+  ] = useState("");
+
+
+  useEffect(() => {
+
+    const loadStats =
+      async () => {
+
+        try {
+
+          setIsLoading(true);
+
+          setError("");
+
+
+          const response =
+            await getDashboardStats();
+
+
+          setStats(
+            response.data
+          );
+
+
+        } catch (error) {
+
+          console.error(
+            "Dashboard Stats Error:",
+            error
+          );
+
+
+          setError(
+
+            error?.response
+              ?.data
+              ?.message ||
+
+            "Failed to load dashboard statistics."
+
+          );
+
+        } finally {
+
+          setIsLoading(false);
+
+        }
+
+      };
+
+
+    loadStats();
+
+  }, []);
+
+
+  const dashboardStats = [
 
     {
       title:
         "Total Products",
 
       value:
-        "0",
+        stats.totalProducts,
+
     },
 
     {
@@ -16,7 +107,8 @@ const AdminDashboardPage = () => {
         "Total Orders",
 
       value:
-        "0",
+        stats.totalOrders,
+
     },
 
     {
@@ -24,7 +116,8 @@ const AdminDashboardPage = () => {
         "Total Customers",
 
       value:
-        "0",
+        stats.totalCustomers,
+
     },
 
     {
@@ -32,14 +125,19 @@ const AdminDashboardPage = () => {
         "Pending Orders",
 
       value:
-        "0",
+        stats.pendingOrders,
+
     },
 
   ];
 
 
   return (
+
     <div className="space-y-8">
+
+
+      {/* Header */}
 
       <div>
 
@@ -54,9 +152,24 @@ const AdminDashboardPage = () => {
       </div>
 
 
+      {/* Error */}
+
+      {error && (
+
+        <div className="rounded-lg border border-red-200 bg-red-50 p-4 text-sm text-red-600">
+
+          {error}
+
+        </div>
+
+      )}
+
+
+      {/* Statistics */}
+
       <div className="grid gap-5 sm:grid-cols-2 xl:grid-cols-4">
 
-        {stats.map(
+        {dashboardStats.map(
           (stat) => (
 
             <div
@@ -72,10 +185,13 @@ const AdminDashboardPage = () => {
                 }
               </p>
 
+
               <p className="mt-3 text-3xl font-semibold">
-                {
-                  stat.value
-                }
+
+                {isLoading
+                  ? "..."
+                  : stat.value}
+
               </p>
 
             </div>
@@ -85,6 +201,8 @@ const AdminDashboardPage = () => {
 
       </div>
 
+
+      {/* Welcome */}
 
       <div className="rounded-xl border bg-white p-8">
 
@@ -98,8 +216,11 @@ const AdminDashboardPage = () => {
 
       </div>
 
+
     </div>
+
   );
+
 };
 
 

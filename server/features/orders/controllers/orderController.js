@@ -3,6 +3,9 @@ import {
   createOrder,
   getUserOrders,
   getUserOrderById,
+  getAllOrders,
+  getOrderById,
+  updateOrderStatus,
 } from "../services/orderService.js";
 
 
@@ -19,10 +22,7 @@ export const createOrderController =
   ) => {
     try {
       const {
-        fullName,
-        phone,
-        address,
-        city,
+        shippingAddress,
         paymentMethod,
       } = req.body;
 
@@ -31,10 +31,7 @@ export const createOrderController =
         await createOrder(
           req.user.userId,
           {
-            fullName,
-            phone,
-            address,
-            city,
+            shippingAddress,
             paymentMethod,
           }
         );
@@ -48,6 +45,7 @@ export const createOrderController =
 
         data: order,
       });
+
     } catch (error) {
       next(error);
     }
@@ -55,11 +53,11 @@ export const createOrderController =
 
 
 // ==========================================
-// GET USER ORDERS
-// GET /api/orders
+// GET MY ORDERS
+// GET /api/orders/my-orders
 // ==========================================
 
-export const getOrders =
+export const getMyOrders =
   async (
     req,
     res,
@@ -71,11 +69,13 @@ export const getOrders =
           req.user.userId
         );
 
+
       return res.status(200).json({
         success: true,
 
         data: orders,
       });
+
     } catch (error) {
       next(error);
     }
@@ -83,11 +83,11 @@ export const getOrders =
 
 
 // ==========================================
-// GET SINGLE ORDER
-// GET /api/orders/:id
+// GET MY ORDER BY ID
+// GET /api/orders/my-orders/:id
 // ==========================================
 
-export const getOrder =
+export const getMyOrderById =
   async (
     req,
     res,
@@ -100,12 +100,112 @@ export const getOrder =
           req.params.id
         );
 
+
       return res.status(200).json({
         success: true,
 
         data: order,
       });
+
     } catch (error) {
       next(error);
     }
   };
+
+
+// ==========================================
+// ADMIN - GET ALL ORDERS
+// GET /api/orders/admin
+// ==========================================
+
+export const getAdminOrders =
+  async (
+    req,
+    res,
+    next
+  ) => {
+    try {
+      const orders =
+        await getAllOrders();
+
+
+      return res.status(200).json({
+        success: true,
+
+        data: orders,
+      });
+
+    } catch (error) {
+      next(error);
+    }
+  };
+
+
+// ==========================================
+// ADMIN - GET ORDER BY ID
+// GET /api/orders/admin/:id
+// ==========================================
+
+export const getAdminOrderById =
+  async (
+    req,
+    res,
+    next
+  ) => {
+    try {
+      const order =
+        await getOrderById(
+          req.params.id
+        );
+
+
+      return res.status(200).json({
+        success: true,
+
+        data: order,
+      });
+
+    } catch (error) {
+      next(error);
+    }
+  };
+
+
+// ==========================================
+// ADMIN - UPDATE ORDER STATUS
+// PATCH /api/orders/admin/:id/status
+// ==========================================
+
+export const updateAdminOrderStatus =
+  async (
+    req,
+    res,
+    next
+  ) => {
+    try {
+      const {
+        orderStatus,
+      } = req.body;
+
+
+      const order =
+        await updateOrderStatus(
+          req.params.id,
+          orderStatus
+        );
+
+
+      return res.status(200).json({
+        success: true,
+
+        message:
+          "Order status updated successfully",
+
+        data: order,
+      });
+
+    } catch (error) {
+      next(error);
+    }
+  };
+

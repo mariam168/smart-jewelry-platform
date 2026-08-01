@@ -7,7 +7,7 @@ import authRoutes from "./features/auth/routes/authRoutes.js";
 import errorMiddleware from "./middleware/errorMiddleware.js";
 import orderRoutes from "./features/orders/routes/orderRoutes.js";
 import homeRoutes from "./features/home/routes/homeRoutes.js";
-
+import dashboardRoutes from "./features/admin/routes/dashboardRoutes.js";
 import adminAuthRoutes from "./features/admin/routes/adminRoutes.js";
 
 import productRoutes from "./features/catalog/routes/productRoutes.js";
@@ -101,7 +101,10 @@ app.use(
 // ==========================================
 // AUTH ROUTES
 // ==========================================
-
+app.use(
+  "/api/admin",
+  dashboardRoutes
+);
 app.use(
   "/api/auth",
   authRoutes

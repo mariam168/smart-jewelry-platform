@@ -18,52 +18,52 @@ import {
 
 
 const CheckoutPage = () => {
-
-  const navigate =
-    useNavigate();
+  const navigate = useNavigate();
 
   const {
     cart,
-    isLoading,
+    isLoading: cartLoading,
   } = useCart();
-
-
-  const items =
-    cart?.items || [];
-
-
-  const [
-    formValues,
-    setFormValues,
-  ] = useState({
-    fullName: "",
-    phone: "",
-    address: "",
-    city: "",
-    paymentMethod:
-      "cash_on_delivery",
-  });
-
-
-  const [
-    error,
-    setError,
-  ] = useState("");
-
 
   const [
     submitting,
     setSubmitting,
   ] = useState(false);
 
+  const [
+    error,
+    setError,
+  ] = useState("");
+
+  const [
+    formValues,
+    setFormValues,
+  ] = useState({
+    firstName: "",
+    lastName: "",
+    phone: "",
+    address: "",
+    city: "",
+    country: "Egypt",
+    paymentMethod:
+      "cash_on_delivery",
+  });
+
+
+  const items =
+    cart?.items || [];
+
+
+  // ==========================================
+  // CALCULATE SUBTOTAL
+  // ==========================================
 
   const subtotal =
     items.reduce(
       (total, item) => {
         return (
           total +
-          (item.product?.price ||
-            0) *
+          (item.product?.price || 0) *
             item.quantity
         );
       },
@@ -71,10 +71,32 @@ const CheckoutPage = () => {
     );
 
 
+  // ==========================================
+  // SHIPPING COST
+  // ==========================================
+
+  const shippingCost =
+    subtotal >= 1000
+      ? 0
+      : 50;
+
+
+  // ==========================================
+  // TOTAL
+  // ==========================================
+
+  const total =
+    subtotal +
+    shippingCost;
+
+
+  // ==========================================
+  // HANDLE INPUT CHANGE
+  // ==========================================
+
   const handleChange = (
     event
   ) => {
-
     const {
       name,
       value,
@@ -91,103 +113,158 @@ const CheckoutPage = () => {
   };
 
 
-  const handleSubmit =
-    async (event) => {
+  // ==========================================
+  // VALIDATE FORM
+  // ==========================================
 
-      event.preventDefault();
+  const validateForm = () => {
+    if (
+      !formValues.firstName.trim()
+    ) {
+      return "First name is required";
+    }
 
-      if (
-        !formValues.fullName.trim() ||
-        !formValues.phone.trim() ||
-        !formValues.address.trim() ||
-        !formValues.city.trim()
-      ) {
-        setError(
-          "Please complete all shipping information."
-        );
+    if (
+      !formValues.lastName.trim()
+    ) {
+      return "Last name is required";
+    }
 
-        return;
-      }
+    if (
+      !formValues.phone.trim()
+    ) {
+      return "Phone number is required";
+    }
 
+    if (
+      !formValues.address.trim()
+    ) {
+      return "Address is required";
+    }
 
-      if (
-        items.length === 0
-      ) {
-        setError(
-          "Your cart is empty."
-        );
+    if (
+      !formValues.city.trim()
+    ) {
+      return "City is required";
+    }
 
-        return;
-      }
-
-
-      try {
-
-        setSubmitting(true);
-
-        setError("");
-
-
-        const response =
-          await createOrder(
-            formValues
-          );
+    return "";
+  };
 
 
-        const order =
-          response.data;
+  // ==========================================
+  // HANDLE SUBMIT
+  // ==========================================
+
+  const handleSubmit = async (
+    event
+  ) => {
+    event.preventDefault();
+
+    const validationError =
+      validateForm();
+
+    if (validationError) {
+      setError(validationError);
+      return;
+    }
+
+    try {
+      setSubmitting(true);
+      setError("");
+
+      const response =
+        await createOrder({
+          shippingAddress: {
+            firstName:
+              formValues.firstName.trim(),
+
+            lastName:
+              formValues.lastName.trim(),
+
+            phone:
+              formValues.phone.trim(),
+
+            address:
+              formValues.address.trim(),
+
+            city:
+              formValues.city.trim(),
+
+            country:
+              formValues.country.trim(),
+          },
+
+          paymentMethod:
+            formValues.paymentMethod,
+        });
 
 
-        navigate(
-          `/checkout/success/${order._id}`,
-          {
-            state: {
-              order,
-            },
-          }
-        );
+      // Backend response:
+      // {
+      //   success: true,
+      //   message: "...",
+      //   data: order
+      // }
 
-      } catch (error) {
-
-        console.error(
-          "Create Order Error:",
-          error
-        );
-
-        setError(
-          error?.response?.data
-            ?.message ||
-            "Unable to create your order."
-        );
-
-      } finally {
-
-        setSubmitting(false);
-
-      }
-    };
+      const order =
+        response.data;
 
 
-  if (isLoading) {
+     navigate(`/order-success/${response.data._id}`, {
+  state: {
+    order: response.data,
+  },
+});
+
+    } catch (error) {
+      console.error(
+        "Create Order Error:",
+        error
+      );
+
+      setError(
+        error?.response?.data?.message ||
+          "Unable to create order. Please try again."
+      );
+
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+
+  // ==========================================
+  // CART LOADING
+  // ==========================================
+
+  if (cartLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
+      <div className="flex min-h-screen items-center justify-center">
         Loading...
       </div>
     );
   }
 
 
+  // ==========================================
+  // EMPTY CART
+  // ==========================================
+
   if (
     items.length === 0
   ) {
     return (
-      <main className="min-h-screen flex items-center justify-center px-6">
-
+      <main className="flex min-h-screen items-center justify-center px-6">
         <div className="text-center">
 
           <h1 className="text-3xl font-semibold">
             Your cart is empty
           </h1>
+
+          <p className="mt-3 text-gray-500">
+            Add some products before checkout.
+          </p>
 
           <Link
             to="/shop"
@@ -197,11 +274,14 @@ const CheckoutPage = () => {
           </Link>
 
         </div>
-
       </main>
     );
   }
 
+
+  // ==========================================
+  // PAGE
+  // ==========================================
 
   return (
     <main className="min-h-screen bg-gray-50 px-6 py-12">
@@ -214,13 +294,13 @@ const CheckoutPage = () => {
 
 
         <form
-          onSubmit={
-            handleSubmit
-          }
+          onSubmit={handleSubmit}
           className="grid gap-8 lg:grid-cols-3"
         >
 
-          {/* SHIPPING */}
+          {/* ==================================
+              SHIPPING INFORMATION
+          ================================== */}
 
           <div className="rounded-xl border bg-white p-6 lg:col-span-2">
 
@@ -230,7 +310,7 @@ const CheckoutPage = () => {
 
 
             {error && (
-              <div className="mt-5 rounded-lg bg-red-50 p-4 text-sm text-red-600">
+              <div className="mt-5 rounded-lg border border-red-200 bg-red-50 p-4 text-sm text-red-600">
                 {error}
               </div>
             )}
@@ -238,29 +318,51 @@ const CheckoutPage = () => {
 
             <div className="mt-6 grid gap-5">
 
-              <div>
+              {/* FIRST NAME */}
 
+              <div>
                 <label className="mb-2 block text-sm font-medium">
-                  Full Name
+                  First Name
                 </label>
 
                 <input
-                  name="fullName"
+                  name="firstName"
                   value={
-                    formValues.fullName
+                    formValues.firstName
                   }
                   onChange={
                     handleChange
                   }
                   className="w-full rounded-lg border px-4 py-3 outline-none focus:border-black"
-                  placeholder="Enter your full name"
+                  placeholder="Enter your first name"
                 />
-
               </div>
 
 
-              <div>
+              {/* LAST NAME */}
 
+              <div>
+                <label className="mb-2 block text-sm font-medium">
+                  Last Name
+                </label>
+
+                <input
+                  name="lastName"
+                  value={
+                    formValues.lastName
+                  }
+                  onChange={
+                    handleChange
+                  }
+                  className="w-full rounded-lg border px-4 py-3 outline-none focus:border-black"
+                  placeholder="Enter your last name"
+                />
+              </div>
+
+
+              {/* PHONE */}
+
+              <div>
                 <label className="mb-2 block text-sm font-medium">
                   Phone
                 </label>
@@ -276,12 +378,12 @@ const CheckoutPage = () => {
                   className="w-full rounded-lg border px-4 py-3 outline-none focus:border-black"
                   placeholder="Enter your phone number"
                 />
-
               </div>
 
 
-              <div>
+              {/* ADDRESS */}
 
+              <div>
                 <label className="mb-2 block text-sm font-medium">
                   Address
                 </label>
@@ -298,12 +400,12 @@ const CheckoutPage = () => {
                   className="w-full rounded-lg border px-4 py-3 outline-none focus:border-black"
                   placeholder="Enter your address"
                 />
-
               </div>
 
 
-              <div>
+              {/* CITY */}
 
+              <div>
                 <label className="mb-2 block text-sm font-medium">
                   City
                 </label>
@@ -319,9 +421,30 @@ const CheckoutPage = () => {
                   className="w-full rounded-lg border px-4 py-3 outline-none focus:border-black"
                   placeholder="Enter your city"
                 />
-
               </div>
 
+
+              {/* COUNTRY */}
+
+              <div>
+                <label className="mb-2 block text-sm font-medium">
+                  Country
+                </label>
+
+                <input
+                  name="country"
+                  value={
+                    formValues.country
+                  }
+                  onChange={
+                    handleChange
+                  }
+                  className="w-full rounded-lg border px-4 py-3 outline-none focus:border-black"
+                />
+              </div>
+
+
+              {/* PAYMENT */}
 
               <div>
 
@@ -357,7 +480,9 @@ const CheckoutPage = () => {
           </div>
 
 
-          {/* SUMMARY */}
+          {/* ==================================
+              ORDER SUMMARY
+          ================================== */}
 
           <aside className="h-fit rounded-xl border bg-white p-6">
 
@@ -370,7 +495,6 @@ const CheckoutPage = () => {
 
               {items.map(
                 (item) => (
-
                   <div
                     key={
                       item.product?._id
@@ -379,44 +503,58 @@ const CheckoutPage = () => {
                   >
 
                     <span>
-                      {
-                        item.product
-                          ?.name
-                      }{" "}
-                      ×{" "}
-                      {
-                        item.quantity
-                      }
+                      {item.product?.name}
+                      {" × "}
+                      {item.quantity}
                     </span>
 
                     <span>
-                      {
-                        (item.product
-                          ?.price ||
-                          0) *
-                          item.quantity
-                      }{" "}
-                      EGP
+                      {(item.product?.price || 0) *
+                        item.quantity}
+                      {" "}EGP
                     </span>
 
                   </div>
-
                 )
               )}
 
             </div>
 
 
-            <div className="mt-6 border-t pt-5">
+            <div className="mt-6 space-y-3 border-t pt-5">
 
-              <div className="flex justify-between text-lg font-semibold">
+              <div className="flex justify-between">
+                <span>
+                  Subtotal
+                </span>
+
+                <span>
+                  {subtotal} EGP
+                </span>
+              </div>
+
+
+              <div className="flex justify-between">
+                <span>
+                  Shipping
+                </span>
+
+                <span>
+                  {shippingCost === 0
+                    ? "Free"
+                    : `${shippingCost} EGP`}
+                </span>
+              </div>
+
+
+              <div className="flex justify-between border-t pt-3 text-lg font-semibold">
 
                 <span>
                   Total
                 </span>
 
                 <span>
-                  {subtotal} EGP
+                  {total} EGP
                 </span>
 
               </div>
@@ -426,10 +564,8 @@ const CheckoutPage = () => {
 
             <button
               type="submit"
-              disabled={
-                submitting
-              }
-              className="mt-6 w-full rounded-lg bg-black py-3 text-white disabled:cursor-not-allowed disabled:opacity-50"
+              disabled={submitting}
+              className="mt-6 w-full rounded-lg bg-black py-3 text-white transition hover:bg-gray-800 disabled:cursor-not-allowed disabled:opacity-50"
             >
               {submitting
                 ? "Placing Order..."

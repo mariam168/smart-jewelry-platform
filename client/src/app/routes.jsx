@@ -1,263 +1,269 @@
-
 import {
-  createBrowserRouter,
+createBrowserRouter,
 } from "react-router-dom";
-
 
 // ==========================================
 // Customer Layout
 // ==========================================
 
 import MainLayout
-  from "../components/layout/MainLayout";
-
+from "../components/layout/MainLayout";
 
 // ==========================================
 // Authentication
 // ==========================================
 
 import RegisterPage
-  from "../features/auth/pages/RegisterPage";
+from "../features/auth/pages/RegisterPage";
 
 import VerifyEmailPage
-  from "../features/auth/pages/VerifyEmailPage";
+from "../features/auth/pages/VerifyEmailPage";
 
 import LoginPage
-  from "../features/auth/pages/LoginPage";
+from "../features/auth/pages/LoginPage";
 
 import ProtectedRoute
-  from "../features/auth/components/ProtectedRoute";
-
+from "../features/auth/components/ProtectedRoute";
 
 // ==========================================
 // Account
 // ==========================================
 
 import AccountPage
-  from "../features/account/pages/AccountPage";
+from "../features/account/pages/AccountPage";
 
+import MyOrdersPage
+from "../features/orders/pages/MyOrdersPage";
+
+import OrderDetailsPage
+from "../features/orders/pages/OrderDetailsPage";
+
+import OrderSuccessPage
+from "../features/orders/pages/OrderSuccessPage";
 
 // ==========================================
 // Home
 // ==========================================
 
 import HomePage
-  from "../features/home/pages/HomePage";
-
+from "../features/home/pages/HomePage";
 
 // ==========================================
 // Shop
 // ==========================================
 
 import ShopPage
-  from "../features/shop/pages/ShopPage";
+from "../features/shop/pages/ShopPage";
 
 import ProductDetailsPage
-  from "../features/shop/pages/ProductDetailsPage";
+from "../features/shop/pages/ProductDetailsPage";
 
+// ==========================================
+// Cart & Checkout
+// ==========================================
+
+import CartPage
+from "../features/cart/pages/CartPage";
+
+import CheckoutPage
+from "../features/checkout/pages/CheckoutPage";
 
 // ==========================================
 // Admin
 // ==========================================
 
 import AdminLoginPage
-  from "../features/admin/pages/AdminLoginPage";
+from "../features/admin/pages/AdminLoginPage";
 
 import AdminLayout
-  from "../features/admin/components/AdminLayout";
+from "../features/admin/components/AdminLayout";
 
 import AdminDashboardPage
-  from "../features/admin/pages/AdminDashboardPage";
+from "../features/admin/pages/AdminDashboardPage";
 
 import AdminProductsPage
-  from "../features/admin/pages/AdminProductsPage";
+from "../features/admin/pages/AdminProductsPage";
 
 import AddProductPage
-  from "../features/admin/pages/AddProductPage";
-import CartPage
-  from "../features/cart/pages/CartPage";
+from "../features/admin/pages/AddProductPage";
 
-import CheckoutPage
-  from "../features/checkout/pages/CheckoutPage";
+import AdminOrdersPage
+from "../features/admin/pages/AdminOrdersPage";
 
-import OrderSuccessPage
-  from "../features/checkout/pages/OrderSuccessPage";
+import AdminOrderDetailsPage
+from "../features/admin/pages/AdminOrderDetailsPage";
 
 // ==========================================
 // Router
 // ==========================================
 
 const router =
-  createBrowserRouter([
+createBrowserRouter([
+// ========================================
+// CUSTOMER WEBSITE
+// ========================================
 
-    // ========================================
-    // CUSTOMER WEBSITE
-    // ========================================
+
+{
+  element: <MainLayout />,
+
+  children: [
+    // ======================================
+    // HOME
+    // ======================================
 
     {
-      element:
-        <MainLayout />,
+      path: "/",
+      element: <HomePage />,
+    },
+
+    {
+      path: "/home",
+      element: <HomePage />,
+    },
+
+    // ======================================
+    // SHOP
+    // ======================================
+
+    {
+      path: "/shop",
+      element: <ShopPage />,
+    },
+
+    {
+      path: "/shop/products/:id",
+      element: <ProductDetailsPage />,
+    },
+
+    // ======================================
+    // CART
+    // ======================================
+
+    {
+      path: "/cart",
+      element: <CartPage />,
+    },
+
+    // ======================================
+    // CHECKOUT
+    // ======================================
+
+    {
+      path: "/checkout",
+      element: <CheckoutPage />,
+    },
+
+    // ======================================
+    // ORDER SUCCESS
+    // ======================================
+
+    {
+      path: "/order-success/:orderId",
+      element: <OrderSuccessPage />,
+    },
+
+    // ======================================
+    // PROTECTED CUSTOMER ROUTES
+    // ======================================
+
+    {
+      element: <ProtectedRoute />,
 
       children: [
-
-        // Home
+        // Account
         {
-          path: "/",
-
-          element:
-            <HomePage />,
+          path: "/account",
+          element: <AccountPage />,
         },
 
-
-        // Home - Alternative URL
+        // My Orders
         {
-          path: "/home",
-
-          element:
-            <HomePage />,
+          path: "/account/orders",
+          element: <MyOrdersPage />,
         },
 
-
-        // Shop
+        // Order Details
         {
-          path: "/shop",
-
-          element:
-            <ShopPage />,
+          path: "/account/orders/:id",
+          element: <OrderDetailsPage />,
         },
-        {
-  path: "/cart",
-  element: <CartPage />,
+      ],
+    },
+  ],
+},
+
+// ========================================
+// CUSTOMER AUTH
+// ========================================
+
+{
+  path: "/register",
+  element: <RegisterPage />,
 },
 
 {
-  path: "/checkout",
-  element: <CheckoutPage />,
+  path: "/login",
+  element: <LoginPage />,
 },
 
 {
-  path: "/checkout/success/:id",
-  element: <OrderSuccessPage />,
+  path: "/verify-email",
+  element: <VerifyEmailPage />,
 },
-       
 
-        // Product Details
-        {
-          path:
-            "/shop/products/:id",
+// ========================================
+// ADMIN LOGIN
+// ========================================
 
-          element:
-            <ProductDetailsPage />,
-        },
+{
+  path: "/admin/login",
+  element: <AdminLoginPage />,
+},
 
+// ========================================
+// ADMIN DASHBOARD
+// ========================================
 
-        // Protected Customer Routes
-        {
-          element:
-            <ProtectedRoute />,
+{
+  path: "/admin",
 
-          children: [
+  element: <AdminLayout />,
 
-            {
-              path: "/account",
-
-              element:
-                <AccountPage />,
-            },
-
-          ],
-        },
-
-      ],
-    },
-
-
-    // ========================================
-    // CUSTOMER AUTH
-    // ========================================
-
+  children: [
+    // Dashboard
     {
-      path: "/register",
-
-      element:
-        <RegisterPage />,
+      index: true,
+      element: <AdminDashboardPage />,
     },
 
-
+    // Products
     {
-      path: "/login",
-
-      element:
-        <LoginPage />,
+      path: "products",
+      element: <AdminProductsPage />,
     },
 
-
+    // Add Product
     {
-      path: "/verify-email",
-
-      element:
-        <VerifyEmailPage />,
+      path: "products/new",
+      element: <AddProductPage />,
     },
 
-
-    // ========================================
-    // ADMIN LOGIN
-    // ========================================
-
+    // Orders
     {
-      path: "/admin/login",
-
-      element:
-        <AdminLoginPage />,
+      path: "orders",
+      element: <AdminOrdersPage />,
     },
 
-
-    // ========================================
-    // ADMIN DASHBOARD
-    // ========================================
-
+    // Order Details
     {
-      path: "/admin",
-
-      element:
-        <AdminLayout />,
-
-      children: [
-
-        // Dashboard
-        {
-          index: true,
-
-          element:
-            <AdminDashboardPage />,
-        },
-
-
-        // Products
-        {
-          path: "products",
-
-          element:
-            <AdminProductsPage />,
-        },
-
-
-        // Add Product
-        {
-          path: "products/new",
-
-          element:
-            <AddProductPage />,
-        },
-
-      ],
+      path: "orders/:id",
+      element: <AdminOrderDetailsPage />,
     },
+  ],
+},
 
-  ]);
 
-
-// ==========================================
-// IMPORTANT
-// ==========================================
+]);
 
 export default router;

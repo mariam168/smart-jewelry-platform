@@ -1,4 +1,3 @@
-
 import mongoose from "mongoose";
 
 const orderItemSchema = new mongoose.Schema(
@@ -12,6 +11,7 @@ const orderItemSchema = new mongoose.Schema(
     name: {
       type: String,
       required: true,
+      trim: true,
     },
 
     price: {
@@ -36,8 +36,57 @@ const orderItemSchema = new mongoose.Schema(
   }
 );
 
+const shippingAddressSchema = new mongoose.Schema(
+  {
+    firstName: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+
+    lastName: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+
+    phone: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+
+    address: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+
+    city: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+
+    country: {
+      type: String,
+      default: "Egypt",
+      trim: true,
+    },
+  },
+  {
+    _id: false,
+  }
+);
+
 const orderSchema = new mongoose.Schema(
   {
+    orderNumber: {
+      type: String,
+      required: true,
+      unique: true,
+    },
+
     user: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
@@ -48,66 +97,36 @@ const orderSchema = new mongoose.Schema(
       type: [orderItemSchema],
       required: true,
       validate: {
-        validator: function (items) {
-          return items.length > 0;
-        },
+        validator: (items) => items.length > 0,
         message: "Order must contain at least one item",
       },
     },
 
     shippingAddress: {
-      fullName: {
-        type: String,
-        required: true,
-        trim: true,
-      },
-
-      phone: {
-        type: String,
-        required: true,
-        trim: true,
-      },
-
-      address: {
-        type: String,
-        required: true,
-        trim: true,
-      },
-
-      city: {
-        type: String,
-        required: true,
-        trim: true,
-      },
+      type: shippingAddressSchema,
+      required: true,
     },
 
     paymentMethod: {
       type: String,
-      enum: ["cash_on_delivery"],
+      enum: [
+        "cash_on_delivery",
+        "card",
+      ],
       default: "cash_on_delivery",
-      required: true,
     },
 
-    subtotal: {
-      type: Number,
-      required: true,
-      min: 0,
+    paymentStatus: {
+      type: String,
+      enum: [
+        "pending",
+        "paid",
+        "failed",
+      ],
+      default: "pending",
     },
 
-    shippingFee: {
-      type: Number,
-      required: true,
-      min: 0,
-      default: 0,
-    },
-
-    total: {
-      type: Number,
-      required: true,
-      min: 0,
-    },
-
-    status: {
+    orderStatus: {
       type: String,
       enum: [
         "pending",
@@ -118,6 +137,24 @@ const orderSchema = new mongoose.Schema(
         "cancelled",
       ],
       default: "pending",
+    },
+
+    subtotal: {
+      type: Number,
+      required: true,
+      min: 0,
+    },
+
+    shippingCost: {
+      type: Number,
+      default: 0,
+      min: 0,
+    },
+
+    total: {
+      type: Number,
+      required: true,
+      min: 0,
     },
   },
   {
@@ -131,4 +168,3 @@ const Order = mongoose.model(
 );
 
 export default Order;
-
