@@ -94,3 +94,60 @@ export const deleteProduct =
 
     return response.data;
   };
+// ==========================================
+// Upload Image
+// ==========================================
+
+export const uploadImage = async (formData) => {
+
+  const response = await axios.post(
+    "http://localhost:5000/api/upload",
+    formData,
+    {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+      withCredentials: true,
+    }
+  );
+
+  return response.data;
+
+};
+
+
+// ==========================================
+// Create Product Image
+// ==========================================
+
+export const createProductImage = async (imageData) => {
+
+  const response = await axios.post(
+    "http://localhost:5000/api/product-images",
+    imageData,
+    {
+      withCredentials: true,
+    }
+  );
+
+  return response.data;
+
+};
+
+
+// ==========================================
+// Get Product Images
+// ==========================================
+
+export const getProductImages = async (productId) => {
+
+  const response = await axios.get(
+    `http://localhost:5000/api/product-images/product/${productId}`,
+    {
+      withCredentials: true,
+    }
+  );
+
+  return response.data;
+
+};

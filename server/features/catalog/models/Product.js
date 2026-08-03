@@ -82,6 +82,10 @@ const productSchema =
         type: Boolean,
         default: false,
       },
+      primaryImage: {
+  type: String,
+  default: "",
+},
 
       newArrival: {
         type: Boolean,
@@ -97,6 +101,7 @@ const productSchema =
         default: "active",
       },
     },
+  
 
     {
       timestamps: true,

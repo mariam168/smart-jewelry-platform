@@ -100,7 +100,7 @@ from "../features/admin/pages/AdminOrdersPage";
 
 import AdminOrderDetailsPage
 from "../features/admin/pages/AdminOrderDetailsPage";
-
+import EditProductPage from "../features/admin/pages/EditProductPage";
 // ==========================================
 // Router
 // ==========================================
@@ -256,6 +256,11 @@ createBrowserRouter([
       path: "products/new",
       element: <AddProductPage />,
     },
+    {
+  path: "/admin/products/:id/edit",
+  element:<EditProductPage />,
+
+  },
 {
   path: "categories",
   element: <AdminCategoriesPage />,

@@ -2,7 +2,7 @@
 import Product from "../models/Product.js";
 
 import Category from "../models/Category.js";
-
+import ProductImage from "../models/ProductImage.js";
 
 export const createProduct = async (productData) => {
 
@@ -30,25 +30,68 @@ export const createProduct = async (productData) => {
 };
 
 
-export const getAllProducts =
-async()=>{
+export const getAllProducts = async () => {
 
-return await Product.find()
+  const products = await Product.find()
+    .populate("category")
+    .sort({ createdAt: -1 });
 
-.populate("category")
+  const result = await Promise.all(
 
-.sort({
-createdAt:-1
-});
+    products.map(async (product) => {
+
+      const image = await ProductImage.findOne({
+
+        product: product._id,
+        isPrimary: true,
+
+      });
+
+      return {
+
+        ...product.toObject(),
+
+        image: image
+          ? image.imageUrl
+          : "",
+
+      };
+
+    })
+
+  );
+
+  return result;
 
 };
 
-export const getProductById =
-async(productId)=>{
+export const getProductById = async (productId) => {
 
-return await Product.findById(productId)
+  const product = await Product.findById(productId)
+    .populate("category");
 
-.populate("category");
+  if (!product) {
+
+    return null;
+
+  }
+
+  const image = await ProductImage.findOne({
+
+    product: product._id,
+    isPrimary: true,
+
+  });
+
+  return {
+
+    ...product.toObject(),
+
+    image: image
+      ? image.imageUrl
+      : "",
+
+  };
 
 };
 

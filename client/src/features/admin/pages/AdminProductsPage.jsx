@@ -14,58 +14,45 @@ import {
 
 const AdminProductsPage = () => {
 
-  const [
-    products,
-    setProducts,
-  ] = useState([]);
+  const [products, setProducts] =
+    useState([]);
 
-  const [
-    isLoading,
-    setIsLoading,
-  ] = useState(true);
+  const [isLoading, setIsLoading] =
+    useState(true);
 
-  const [
-    error,
-    setError,
-  ] = useState("");
+  const [error, setError] =
+    useState("");
 
-  const loadProducts =
-    async () => {
+  const loadProducts = async () => {
 
-      try {
+    try {
 
-        setIsLoading(true);
+      setIsLoading(true);
+      setError("");
 
-        setError("");
+      const response =
+        await getProducts();
 
-        const response =
-          await getProducts();
+      setProducts(
+        response.data?.products || []
+      );
 
-        setProducts(
-          response.data.products
-        );
+    } catch (error) {
 
-      } catch (error) {
+      console.error(error);
 
-        console.error(error);
+      setError(
+        error?.response?.data?.message ||
+        "Failed to load products."
+      );
 
-        setError(
+    } finally {
 
-          error?.response
-            ?.data
-            ?.message ||
+      setIsLoading(false);
 
-          "Failed to load products."
+    }
 
-        );
-
-      } finally {
-
-        setIsLoading(false);
-
-      }
-
-    };
+  };
 
   useEffect(() => {
 
@@ -85,9 +72,7 @@ const AdminProductsPage = () => {
 
       try {
 
-        await deleteProduct(
-          productId
-        );
+        await deleteProduct(productId);
 
         setProducts(previous =>
           previous.filter(
@@ -99,13 +84,8 @@ const AdminProductsPage = () => {
       } catch (error) {
 
         alert(
-
-          error?.response
-            ?.data
-            ?.message ||
-
+          error?.response?.data?.message ||
           "Delete failed."
-
         );
 
       }
@@ -134,7 +114,7 @@ const AdminProductsPage = () => {
 
           <Link
             to="/admin/products/new"
-            className="rounded-lg bg-black px-5 py-3 text-white"
+            className="rounded-lg bg-black px-5 py-3 font-semibold text-white hover:bg-gray-800"
           >
             Add Product
           </Link>
@@ -147,7 +127,7 @@ const AdminProductsPage = () => {
 
         {error && (
 
-          <div className="mb-6 rounded-lg bg-red-50 p-4 text-red-600">
+          <div className="mb-6 rounded-lg border border-red-200 bg-red-50 p-4 text-red-600">
 
             {error}
 
@@ -157,9 +137,9 @@ const AdminProductsPage = () => {
 
         {isLoading ? (
 
-          <div className="py-20 text-center">
+          <div className="py-20 text-center text-gray-500">
 
-            Loading...
+            Loading Products...
 
           </div>
 
@@ -169,13 +149,13 @@ const AdminProductsPage = () => {
 
             <h2 className="text-xl font-semibold">
 
-              No Products
+              No Products Found
 
             </h2>
 
             <p className="mt-2 text-gray-500">
 
-              Add your first product.
+              Create your first product.
 
             </p>
 
@@ -183,37 +163,41 @@ const AdminProductsPage = () => {
 
         ) : (
 
-          <div className="overflow-hidden rounded-xl border bg-white shadow">
+          <div className="overflow-hidden rounded-xl border bg-white shadow-sm">
 
             <div className="overflow-x-auto">
 
-              <table className="w-full text-left">
+              <table className="w-full">
 
-                <thead className="bg-gray-50 border-b">
+                <thead className="border-b bg-gray-50">
 
                   <tr>
 
-                    <th className="px-6 py-4">
+                    <th className="px-6 py-4 text-left">
+                      Image
+                    </th>
+
+                    <th className="px-6 py-4 text-left">
                       Product
                     </th>
 
-                    <th className="px-6 py-4">
+                    <th className="px-6 py-4 text-left">
                       Category
                     </th>
 
-                    <th className="px-6 py-4">
+                    <th className="px-6 py-4 text-left">
                       Price
                     </th>
 
-                    <th className="px-6 py-4">
+                    <th className="px-6 py-4 text-left">
                       Stock
                     </th>
 
-                    <th className="px-6 py-4">
+                    <th className="px-6 py-4 text-left">
                       Status
                     </th>
 
-                    <th className="px-6 py-4">
+                    <th className="px-6 py-4 text-left">
                       Actions
                     </th>
 
@@ -221,24 +205,50 @@ const AdminProductsPage = () => {
 
                 </thead>
 
-                <tbody>
+                <tbody className="divide-y">
 
                   {products.map(product => (
 
                     <tr
                       key={product._id}
-                      className="border-b hover:bg-gray-50"
+                      className="hover:bg-gray-50"
                     >
 
                       <td className="px-6 py-4">
 
-                        <div className="font-medium">
+                        {product.image ? (
+
+                        <img
+  src={
+    product.image
+      ? `http://localhost:5000${product.image}`
+      : "/placeholder.png"
+  }
+  alt={product.name}
+  className="h-16 w-16 rounded-lg border object-cover"
+/>
+
+                        ) : (
+
+                          <div className="flex h-16 w-16 items-center justify-center rounded-lg border bg-gray-100 text-xs text-gray-400">
+
+                            No Image
+
+                          </div>
+
+                        )}
+
+                      </td>
+
+                      <td className="px-6 py-4">
+
+                        <div className="font-semibold">
 
                           {product.name}
 
                         </div>
 
-                        <div className="text-sm text-gray-500 truncate max-w-xs">
+                        <div className="max-w-xs truncate text-sm text-gray-500">
 
                           {product.description}
 
@@ -267,11 +277,9 @@ const AdminProductsPage = () => {
                       <td className="px-6 py-4">
 
                         <span
-                          className={`rounded-full px-3 py-1 text-xs font-medium ${
+                          className={`rounded-full px-3 py-1 text-xs font-semibold ${
                             product.status === "active"
-
                               ? "bg-green-100 text-green-700"
-
                               : "bg-red-100 text-red-700"
                           }`}
                         >
@@ -290,18 +298,20 @@ const AdminProductsPage = () => {
                             to={`/admin/products/${product._id}/edit`}
                             className="text-blue-600 hover:text-blue-800"
                           >
+
                             Edit
+
                           </Link>
 
                           <button
                             onClick={() =>
-                              handleDelete(
-                                product._id
-                              )
+                              handleDelete(product._id)
                             }
                             className="text-red-600 hover:text-red-800"
                           >
+
                             Delete
+
                           </button>
 
                         </div>
