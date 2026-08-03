@@ -9,7 +9,8 @@ import orderRoutes from "./features/orders/routes/orderRoutes.js";
 import homeRoutes from "./features/home/routes/homeRoutes.js";
 import dashboardRoutes from "./features/admin/routes/dashboardRoutes.js";
 import adminAuthRoutes from "./features/admin/routes/adminRoutes.js";
-
+import path from "path";
+import uploadRoutes from "./routes/uploadRoutes.js";
 import productRoutes from "./features/catalog/routes/productRoutes.js";
 import categoryRoutes from "./features/catalog/routes/categoryRoutes.js";
 import cartRoutes from "./features/cart/routes/cartRoutes.js";
@@ -72,6 +73,12 @@ app.use(
 app.use(
 "/api/product-images",
 productImageRoutes
+);
+app.use("/api/upload", uploadRoutes);
+
+app.use(
+  "/uploads",
+  express.static(path.join(process.cwd(), "uploads"))
 );
 // ==========================================
 // ROOT ROUTE

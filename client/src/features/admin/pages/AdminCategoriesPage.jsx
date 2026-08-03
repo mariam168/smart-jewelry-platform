@@ -123,8 +123,6 @@ const AdminCategoriesPage = () => {
 
     <div className="min-h-screen bg-gray-50">
 
-      {/* Header */}
-
       <header className="border-b bg-white">
 
         <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-5">
@@ -151,8 +149,6 @@ const AdminCategoriesPage = () => {
         </div>
 
       </header>
-
-      {/* Content */}
 
       <main className="mx-auto max-w-7xl px-6 py-10">
 
@@ -206,6 +202,10 @@ const AdminCategoriesPage = () => {
                 <tr>
 
                   <th className="px-6 py-4 text-left">
+                    Image
+                  </th>
+
+                  <th className="px-6 py-4 text-left">
                     Name
                   </th>
 
@@ -233,6 +233,32 @@ const AdminCategoriesPage = () => {
                     key={category._id}
                     className="hover:bg-gray-50"
                   >
+
+                    <td className="px-6 py-4">
+
+                      {category.image ? (
+
+                        <img
+                          src={
+                            category.image.startsWith("http")
+                              ? category.image
+                              : `http://localhost:5000${category.image}`
+                          }
+                          alt={category.name}
+                          className="h-16 w-16 rounded-lg border object-cover"
+                        />
+
+                      ) : (
+
+                        <div className="flex h-16 w-16 items-center justify-center rounded-lg border bg-gray-100 text-xs text-gray-400">
+
+                          No Image
+
+                        </div>
+
+                      )}
+
+                    </td>
 
                     <td className="px-6 py-4 font-medium">
                       {category.name}

@@ -9,6 +9,7 @@ import {
 
 import {
   createCategory,
+  uploadImage,
 } from "../services/categoryApi";
 
 const AddCategoryPage = () => {
@@ -26,6 +27,16 @@ const AddCategoryPage = () => {
     description: "",
 
   });
+
+  const [
+    image,
+    setImage,
+  ] = useState(null);
+
+  const [
+    preview,
+    setPreview,
+  ] = useState("");
 
   const [
     isLoading,
@@ -57,46 +68,65 @@ const AddCategoryPage = () => {
 
     };
 
-  const handleSubmit =
-    async (event) => {
+  const handleImageChange =
+    (event) => {
 
-      event.preventDefault();
+      const file =
+        event.target.files[0];
 
-      setError("");
+      if (!file) return;
 
-      setIsLoading(true);
+      setImage(file);
 
-      try {
-
-        await createCategory(
-          formData
-        );
-
-        navigate(
-          "/admin/categories"
-        );
-
-      } catch (error) {
-
-        console.error(error);
-
-        setError(
-
-          error?.response
-            ?.data
-            ?.message ||
-
-          "Failed to create category."
-
-        );
-
-      } finally {
-
-        setIsLoading(false);
-
-      }
+      setPreview(
+        URL.createObjectURL(file)
+      );
 
     };
+
+ const handleSubmit = async (event) => {
+  event.preventDefault();
+
+  setError("");
+  setIsLoading(true);
+
+  try {
+
+    let imageUrl = "";
+
+    if (image) {
+
+      const formData = new FormData();
+
+      formData.append("image", image);
+
+      const uploadResponse = await uploadImage(formData);
+
+      imageUrl = uploadResponse.image;
+    }
+
+    await createCategory({
+      ...formData,
+      image: imageUrl,
+    });
+
+    navigate("/admin/categories");
+
+  } catch (error) {
+
+    console.error(error);
+
+    setError(
+      error?.response?.data?.message ||
+      "Failed to create category."
+    );
+
+  } finally {
+
+    setIsLoading(false);
+
+  }
+};
 
   return (
 
@@ -188,6 +218,37 @@ const AddCategoryPage = () => {
               />
 
             </div>
+
+            <div>
+
+              <label className="mb-2 block">
+
+                Category Image
+
+              </label>
+
+              <input
+                type="file"
+                accept="image/*"
+                onChange={handleImageChange}
+                className="w-full rounded-lg border px-4 py-3"
+              />
+
+            </div>
+
+            {preview && (
+
+              <div>
+
+                <img
+                  src={preview}
+                  alt="Preview"
+                  className="h-40 w-40 rounded-lg border object-cover"
+                />
+
+              </div>
+
+            )}
 
             <div className="flex justify-end gap-4 border-t pt-6">
 

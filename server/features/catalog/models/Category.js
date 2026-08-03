@@ -6,31 +6,23 @@ const categorySchema = new mongoose.Schema(
       type: String,
       required: true,
       trim: true,
-      unique: true,
     },
 
     slug: {
       type: String,
       required: true,
-      trim: true,
-      lowercase: true,
       unique: true,
+      lowercase: true,
     },
 
     description: {
       type: String,
-      trim: true,
       default: "",
     },
 
     image: {
       type: String,
       default: "",
-    },
-
-    isActive: {
-      type: Boolean,
-      default: true,
     },
 
     sortOrder: {
@@ -43,9 +35,7 @@ const categorySchema = new mongoose.Schema(
   }
 );
 
-const Category = mongoose.model(
+export default mongoose.model(
   "Category",
   categorySchema
 );
-
-export default Category;

@@ -12,160 +12,136 @@ import {
 import {
   getCategory,
   updateCategory,
+  uploadImage,
 } from "../services/categoryApi";
 
 const EditCategoryPage = () => {
 
-  const { id } =
-    useParams();
+  const { id } = useParams();
 
-  const navigate =
-    useNavigate();
+  const navigate = useNavigate();
 
-  const [
-    formData,
-    setFormData,
-  ] = useState({
-
+  const [formData, setFormData] = useState({
     name: "",
-
     description: "",
-
+    image: "",
   });
 
-  const [
-    isLoading,
-    setIsLoading,
-  ] = useState(true);
+  const [image, setImage] = useState(null);
 
-  const [
-    isSaving,
-    setIsSaving,
-  ] = useState(false);
+  const [preview, setPreview] = useState("");
 
-  const [
-    error,
-    setError,
-  ] = useState("");
+  const [isLoading, setIsLoading] = useState(true);
+
+  const [isSaving, setIsSaving] = useState(false);
+
+  const [error, setError] = useState("");
 
   useEffect(() => {
 
-    const loadCategory =
-      async () => {
-
-        try {
-
-          const response =
-            await getCategory(id);
-
-          setFormData({
-
-            name:
-              response.data.name,
-
-            description:
-              response.data.description || "",
-
-          });
-
-        } catch (error) {
-
-          console.error(error);
-
-          setError(
-
-            error?.response
-              ?.data
-              ?.message ||
-
-            "Failed to load category."
-
-          );
-
-        } finally {
-
-          setIsLoading(false);
-
-        }
-
-      };
-
-    loadCategory();
-
-  }, [id]);
-
-  const handleChange =
-    (event) => {
-
-      const {
-        name,
-        value,
-      } = event.target;
-
-      setFormData(
-        (previousData) => ({
-          ...previousData,
-
-          [name]:
-            value,
-
-        })
-      );
-
-    };
-
-  const handleSubmit =
-    async (event) => {
-
-      event.preventDefault();
-
-      setError("");
-
-      setIsSaving(true);
+    const loadCategory = async () => {
 
       try {
 
-        await updateCategory(
-          id,
-          formData
-        );
+        const response = await getCategory(id);
+console.log(response);
+        const category = response.data.category || response.data;
 
-        navigate(
-          "/admin/categories"
-        );
+        setFormData({
+          name: category.name,
+          description: category.description || "",
+          image: category.image || "",
+        });
+
+        setPreview(category.image || "");
 
       } catch (error) {
 
         console.error(error);
 
         setError(
-
-          error?.response
-            ?.data
-            ?.message ||
-
-          "Failed to update category."
-
+          error?.response?.data?.message ||
+          "Failed to load category."
         );
 
       } finally {
 
-        setIsSaving(false);
+        setIsLoading(false);
 
       }
 
     };
 
+    loadCategory();
+
+  }, [id]);
+
+  const handleChange = (event) => {
+
+    const { name, value } = event.target;
+
+    setFormData((previousData) => ({
+      ...previousData,
+      [name]: value,
+    }));
+
+  };
+
+  const handleSubmit = async (event) => {
+
+    event.preventDefault();
+
+    setError("");
+
+    setIsSaving(true);
+
+    try {
+
+      let imageUrl = formData.image;
+
+      if (image) {
+
+        const uploadData = new FormData();
+
+        uploadData.append("image", image);
+
+        const uploadResponse =
+          await uploadImage(uploadData);
+
+        imageUrl = uploadResponse.image;
+
+      }
+
+      await updateCategory(id, {
+        ...formData,
+        image: imageUrl,
+      });
+
+      navigate("/admin/categories");
+
+    } catch (error) {
+
+      console.error(error);
+
+      setError(
+        error?.response?.data?.message ||
+        "Failed to update category."
+      );
+
+    } finally {
+
+      setIsSaving(false);
+
+    }
+
+  };
+
   if (isLoading) {
 
     return (
-
       <div className="flex min-h-screen items-center justify-center">
-
         Loading...
-
       </div>
-
     );
 
   }
@@ -181,15 +157,11 @@ const EditCategoryPage = () => {
           <div>
 
             <h1 className="text-2xl font-bold">
-
               Edit Category
-
             </h1>
 
             <p className="text-sm text-gray-500">
-
               Update category information
-
             </p>
 
           </div>
@@ -212,9 +184,7 @@ const EditCategoryPage = () => {
           {error && (
 
             <div className="mb-6 rounded-lg border border-red-200 bg-red-50 p-4 text-red-600">
-
               {error}
-
             </div>
 
           )}
@@ -227,9 +197,7 @@ const EditCategoryPage = () => {
             <div>
 
               <label className="mb-2 block">
-
                 Category Name
-
               </label>
 
               <input
@@ -246,9 +214,7 @@ const EditCategoryPage = () => {
             <div>
 
               <label className="mb-2 block">
-
                 Description
-
               </label>
 
               <textarea
@@ -258,6 +224,44 @@ const EditCategoryPage = () => {
                 onChange={handleChange}
                 className="w-full rounded-lg border px-4 py-3"
               />
+
+            </div>
+
+            <div>
+
+              <label className="mb-2 block">
+                Category Image
+              </label>
+
+              <input
+                type="file"
+                accept="image/*"
+                onChange={(e) => {
+
+                  const file = e.target.files[0];
+
+                  setImage(file);
+
+                  if (file) {
+
+                    setPreview(
+                      URL.createObjectURL(file)
+                    );
+
+                  }
+
+                }}
+              />
+
+              {preview && (
+
+                <img
+                  src={preview}
+                  alt="Preview"
+                  className="mt-4 h-32 w-32 rounded-lg border object-cover"
+                />
+
+              )}
 
             </div>
 
