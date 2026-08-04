@@ -1,12 +1,15 @@
-
 const ShopFilters = ({
   search,
   setSearch,
   category,
   setCategory,
+  categories = [],
 }) => {
   return (
     <div className="grid gap-4 rounded-2xl border border-gray-200 bg-white p-5 md:grid-cols-2">
+
+      {/* Search */}
+
       <div>
         <label className="mb-2 block text-sm font-medium text-gray-700">
           Search
@@ -23,6 +26,8 @@ const ShopFilters = ({
         />
       </div>
 
+      {/* Categories */}
+
       <div>
         <label className="mb-2 block text-sm font-medium text-gray-700">
           Category
@@ -35,27 +40,19 @@ const ShopFilters = ({
           }
           className="w-full rounded-lg border border-gray-300 bg-white px-4 py-3 text-sm outline-none transition focus:border-black"
         >
-          <option value="all">
-            All Categories
-          </option>
-
-          <option value="Bracelet">
-            Bracelets
-          </option>
-
-          <option value="Necklace">
-            Necklaces
-          </option>
-
-          <option value="Ring">
-            Rings
-          </option>
-
-          <option value="Other">
-            Other
-          </option>
+          {categories.map((item) => (
+            <option
+              key={item}
+              value={item}
+            >
+              {item === "all"
+                ? "All Categories"
+                : item}
+            </option>
+          ))}
         </select>
       </div>
+
     </div>
   );
 };

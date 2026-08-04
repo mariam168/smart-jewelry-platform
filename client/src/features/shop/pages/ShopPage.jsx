@@ -1,4 +1,3 @@
-
 import {
   useEffect,
   useMemo,
@@ -13,8 +12,8 @@ import {
   getShopProducts,
 } from "../services/shopApi";
 
-
 const ShopPage = () => {
+
   const [
     products,
     setProducts,
@@ -40,73 +39,134 @@ const ShopPage = () => {
     setError,
   ] = useState("");
 
+  // ==========================================
+  // Load Products
+  // ==========================================
 
   useEffect(() => {
+
     const loadProducts = async () => {
+
       try {
+
         setIsLoading(true);
+
         setError("");
 
         const response =
           await getShopProducts();
 
+        console.log("Products:", response);
+
         setProducts(
-          response?.data?.products || []
+          response?.products || []
         );
+
       } catch (error) {
+
         console.error(
           "Shop Products Error:",
           error
         );
 
         setError(
+
           error?.response?.data?.message ||
-            "Failed to load products."
+
+          "Failed to load products."
+
         );
+
       } finally {
+
         setIsLoading(false);
+
       }
+
     };
 
     loadProducts();
+
   }, []);
 
+  // ==========================================
+  // Categories
+  // ==========================================
 
-  const filteredProducts =
-    useMemo(() => {
-      return products.filter(
-        (product) => {
-          const matchesSearch =
-            product.name
-              .toLowerCase()
-              .includes(
-                search.toLowerCase()
-              ) ||
-            product.description
-              .toLowerCase()
-              .includes(
-                search.toLowerCase()
-              );
+  const categories = useMemo(() => {
 
-          const matchesCategory =
-            category === "all" ||
-            product.category === category;
+    return [
 
-          return (
-            matchesSearch &&
-            matchesCategory
+      "all",
+
+      ...new Set(
+
+        products
+
+          .map(product => product.category?.name)
+
+          .filter(Boolean)
+
+      ),
+
+    ];
+
+  }, [products]);
+
+  // ==========================================
+  // Filter Products
+  // ==========================================
+
+  const filteredProducts = useMemo(() => {
+
+    return products.filter((product) => {
+
+      const matchesSearch =
+
+        product.name
+          ?.toLowerCase()
+          .includes(
+            search.toLowerCase()
+          ) ||
+
+        product.description
+          ?.toLowerCase()
+          .includes(
+            search.toLowerCase()
           );
-        }
-      );
-    }, [
-      products,
-      search,
-      category,
-    ]);
 
+      const matchesCategory =
+
+        category === "all" ||
+
+        product.category?.name === category ||
+
+        product.category?._id === category;
+
+      return (
+
+        matchesSearch &&
+
+        matchesCategory
+
+      );
+
+    });
+
+  }, [
+
+    products,
+
+    search,
+
+    category,
+
+  ]);
 
   return (
+
     <div className="min-h-screen bg-gray-50">
+
       <ShopHeader
         productsCount={
           filteredProducts.length
@@ -114,38 +174,55 @@ const ShopPage = () => {
       />
 
       <main className="mx-auto max-w-7xl px-6 py-10">
+
         <ShopFilters
           search={search}
           setSearch={setSearch}
           category={category}
           setCategory={setCategory}
+          categories={categories}
         />
 
         {error && (
+
           <div className="mt-8 rounded-xl border border-red-200 bg-red-50 p-5 text-sm text-red-600">
+
             {error}
+
           </div>
+
         )}
 
         {isLoading ? (
+
           <div className="py-24 text-center">
+
             <p className="text-sm text-gray-500">
+
               Loading our collection...
+
             </p>
+
           </div>
+
         ) : (
+
           <div className="mt-10">
+
             <ProductGrid
-              products={
-                filteredProducts
-              }
+              products={filteredProducts}
             />
+
           </div>
+
         )}
+
       </main>
+
     </div>
+
   );
+
 };
 
 export default ShopPage;
-

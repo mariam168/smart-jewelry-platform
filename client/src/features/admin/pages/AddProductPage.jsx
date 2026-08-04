@@ -31,23 +31,46 @@ const AddProductPage = () => {
 
   const [previewImages, setPreviewImages] =
     useState([]);
+const [formData, setFormData] = useState({
 
-  const [formData, setFormData] =
-    useState({
+  name: "",
+  shortDescription: "",
+  description: "",
 
-      name: "",
+  category: "",
 
-      description: "",
+  price: "",
+  comparePrice: "",
 
-      category: "",
+  stock: "",
 
-      price: "",
+  sku: "",
 
-      stock: "",
+  material: "",
 
-      status: "active",
+  color: "",
 
-    });
+  weight: "",
+
+  featured: false,
+  bestSeller: false,
+  newArrival: false,
+
+  tags: "",
+
+  seoTitle: "",
+  seoDescription: "",
+  seoSlug: "",
+
+  preparationDays: "",
+
+  careInstructions: "",
+
+  isCustomizable: false,
+
+  status: "active",
+
+});
 
   const [isLoading, setIsLoading] =
     useState(false);
@@ -94,23 +117,27 @@ const AddProductPage = () => {
 
   }, []);
 
-  const handleChange =
-    (event) => {
+  const handleChange = (event) => {
 
-      const {
-        name,
-        value,
-      } = event.target;
+  const {
+    name,
+    value,
+    type,
+    checked,
+  } = event.target;
 
-      setFormData(previous => ({
+  setFormData(previous => ({
 
-        ...previous,
+    ...previous,
 
-        [name]: value,
+    [name]:
+      type === "checkbox"
+        ? checked
+        : value,
 
-      }));
+  }));
 
-    };
+};
 
   const handleImageChange =
     (event) => {
@@ -144,27 +171,77 @@ const AddProductPage = () => {
       try {
 
         const productResponse =
-          await createProduct({
+       await createProduct({
 
-            name:
-              formData.name,
+  name: formData.name,
 
-            description:
-              formData.description,
+  shortDescription:
+    formData.shortDescription,
 
-            category:
-              formData.category,
+  description:
+    formData.description,
 
-            price:
-              Number(formData.price),
+  category:
+    formData.category,
 
-            stock:
-              Number(formData.stock),
+  price:
+    Number(formData.price),
 
-            status:
-              formData.status,
+  comparePrice:
+    Number(formData.comparePrice),
 
-          });
+  stock:
+    Number(formData.stock),
+
+  sku:
+    formData.sku,
+
+  material:
+    formData.material,
+
+  color:
+    formData.color,
+
+  weight:
+    Number(formData.weight),
+
+  featured:
+    formData.featured,
+
+  bestSeller:
+    formData.bestSeller,
+
+  newArrival:
+    formData.newArrival,
+
+  tags:
+    formData.tags
+      .split(",")
+      .map(tag => tag.trim())
+      .filter(Boolean),
+
+  seoTitle:
+    formData.seoTitle,
+
+  seoDescription:
+    formData.seoDescription,
+
+  seoSlug:
+    formData.seoSlug,
+
+  preparationDays:
+    Number(formData.preparationDays),
+
+  careInstructions:
+    formData.careInstructions,
+
+  isCustomizable:
+    formData.isCustomizable,
+
+  status:
+    formData.status,
+
+});
 
         const product =
           productResponse.data.product;
@@ -327,6 +404,20 @@ const AddProductPage = () => {
               />
 
             </div>
+            <div>
+  <label className="mb-2 block">
+    Short Description
+  </label>
+
+  <input
+    type="text"
+    name="shortDescription"
+    value={formData.shortDescription}
+    onChange={handleChange}
+    className="w-full rounded-lg border px-4 py-3"
+    placeholder="Short description for product card"
+  />
+</div>
 
             <div>
 
@@ -344,6 +435,42 @@ const AddProductPage = () => {
               />
 
             </div>
+            <div className="grid grid-cols-2 gap-6">
+
+  <div>
+
+    <label className="mb-2 block">
+      SKU
+    </label>
+
+    <input
+      type="text"
+      name="sku"
+      value={formData.sku}
+      onChange={handleChange}
+      className="w-full rounded-lg border px-4 py-3"
+    />
+
+  </div>
+
+  <div>
+
+    <label className="mb-2 block">
+      Compare Price
+    </label>
+
+    <input
+      type="number"
+      min="0"
+      name="comparePrice"
+      value={formData.comparePrice}
+      onChange={handleChange}
+      className="w-full rounded-lg border px-4 py-3"
+    />
+
+  </div>
+
+</div>
 
             <div>
 
@@ -414,6 +541,249 @@ const AddProductPage = () => {
             </div>
 
             <div>
+              <div className="grid grid-cols-3 gap-6">
+
+  <div>
+
+    <label className="mb-2 block">
+      Material
+    </label>
+
+    <input
+      type="text"
+      name="material"
+      value={formData.material}
+      onChange={handleChange}
+      className="w-full rounded-lg border px-4 py-3"
+    />
+
+  </div>
+
+  <div>
+
+    <label className="mb-2 block">
+      Color
+    </label>
+
+    <input
+      type="text"
+      name="color"
+      value={formData.color}
+      onChange={handleChange}
+      className="w-full rounded-lg border px-4 py-3"
+    />
+
+  </div>
+
+  <div>
+
+    <label className="mb-2 block">
+      Weight (g)
+    </label>
+
+    <input
+      type="number"
+      min="0"
+      name="weight"
+      value={formData.weight}
+      onChange={handleChange}
+      className="w-full rounded-lg border px-4 py-3"
+    />
+
+  </div>
+
+</div>
+<div>
+
+  <label className="mb-2 block">
+    Tags
+  </label>
+
+  <input
+    type="text"
+    name="tags"
+    value={formData.tags}
+    onChange={handleChange}
+    placeholder="gold, ring, gift"
+    className="w-full rounded-lg border px-4 py-3"
+  />
+
+</div>
+<div className="rounded-xl border p-6">
+
+  <h2 className="mb-5 text-xl font-semibold">
+
+    SEO
+
+  </h2>
+
+  <div className="space-y-5">
+
+    <div>
+
+      <label className="mb-2 block">
+
+        SEO Title
+
+      </label>
+
+      <input
+        type="text"
+        name="seoTitle"
+        value={formData.seoTitle}
+        onChange={handleChange}
+        className="w-full rounded-lg border px-4 py-3"
+      />
+
+    </div>
+
+    <div>
+
+      <label className="mb-2 block">
+
+        SEO Slug
+
+      </label>
+
+      <input
+        type="text"
+        name="seoSlug"
+        value={formData.seoSlug}
+        onChange={handleChange}
+        className="w-full rounded-lg border px-4 py-3"
+      />
+
+    </div>
+
+    <div>
+
+      <label className="mb-2 block">
+
+        SEO Description
+
+      </label>
+
+      <textarea
+        rows={4}
+        name="seoDescription"
+        value={formData.seoDescription}
+        onChange={handleChange}
+        className="w-full rounded-lg border px-4 py-3"
+      />
+
+    </div>
+
+  </div>
+
+</div>
+<div className="grid grid-cols-2 gap-6">
+
+  <div>
+
+    <label className="mb-2 block">
+
+      Preparation Days
+
+    </label>
+
+    <input
+      type="number"
+      min="0"
+      name="preparationDays"
+      value={formData.preparationDays}
+      onChange={handleChange}
+      className="w-full rounded-lg border px-4 py-3"
+    />
+
+  </div>
+
+  <div className="flex items-end">
+
+    <label className="flex items-center gap-3">
+
+      <input
+        type="checkbox"
+        name="isCustomizable"
+        checked={formData.isCustomizable}
+        onChange={handleChange}
+      />
+
+      Customizable Product
+
+    </label>
+
+  </div>
+
+</div>
+<div>
+
+  <label className="mb-2 block">
+
+    Care Instructions
+
+  </label>
+
+  <textarea
+    rows={4}
+    name="careInstructions"
+    value={formData.careInstructions}
+    onChange={handleChange}
+    className="w-full rounded-lg border px-4 py-3"
+  />
+
+</div>
+<div className="rounded-xl border p-6">
+
+  <h2 className="mb-5 text-xl font-semibold">
+
+    Marketing
+
+  </h2>
+
+  <div className="flex flex-wrap gap-8">
+
+    <label className="flex items-center gap-2">
+
+      <input
+        type="checkbox"
+        name="featured"
+        checked={formData.featured}
+        onChange={handleChange}
+      />
+
+      Featured
+
+    </label>
+
+    <label className="flex items-center gap-2">
+
+      <input
+        type="checkbox"
+        name="bestSeller"
+        checked={formData.bestSeller}
+        onChange={handleChange}
+      />
+
+      Best Seller
+
+    </label>
+
+    <label className="flex items-center gap-2">
+
+      <input
+        type="checkbox"
+        name="newArrival"
+        checked={formData.newArrival}
+        onChange={handleChange}
+      />
+
+      New Arrival
+
+    </label>
+
+  </div>
+
+</div>
 
               <label className="mb-2 block">
                 Status

@@ -26,7 +26,10 @@ from "../features/auth/pages/RegisterPage";
 
 import VerifyEmailPage
 from "../features/auth/pages/VerifyEmailPage";
-
+import AdminProductVariantsPage
+from "../features/admin/pages/AdminProductVariantsPage";
+import AddVariantPage
+from "../features/admin/pages/AddVariantPage";
 import LoginPage
 from "../features/auth/pages/LoginPage";
 
@@ -39,7 +42,7 @@ from "../features/auth/components/ProtectedRoute";
 
 import AccountPage
 from "../features/account/pages/AccountPage";
-
+import EditVariantPage from "../features/admin/pages/EditVariantPage";
 import MyOrdersPage
 from "../features/orders/pages/MyOrdersPage";
 
@@ -228,6 +231,8 @@ createBrowserRouter([
   path: "/admin/login",
   element: <AdminLoginPage />,
 },
+{ path:"/admin/variants/:id/edit",
+  element:<EditVariantPage />},
 
 // ========================================
 // ADMIN DASHBOARD
@@ -250,6 +255,21 @@ createBrowserRouter([
       path: "products",
       element: <AdminProductsPage />,
     },
+    {
+  path:"/admin/products/:id/variants",
+  element:<AdminProductVariantsPage />,
+
+  },
+  {
+    path:"/admin/products/:id/variants",
+     element:<AdminProductVariantsPage />,
+    } ,
+   { 
+    path:"/admin/products/:id/variants/new" ,
+    element:<AddVariantPage />,
+
+    } ,
+
 
     // Add Product
     {

@@ -1,38 +1,66 @@
-
 import axios from "axios";
 
 const API_URL =
   "http://localhost:5000/api/products";
 
-
 // ==========================================
-// Get All Shop Products
+// Get All Products
 // ==========================================
 
 export const getShopProducts =
   async () => {
 
     const response =
-      await axios.get(
-        API_URL
-      );
+      await axios.get(API_URL);
 
-    return response.data;
+    return response.data.data;
+
   };
 
-
 // ==========================================
-// Get Single Product
+// Get Product
 // ==========================================
 
 export const getShopProduct =
+  async (id) => {
+
+    const response =
+      await axios.get(
+        `${API_URL}/${id}`
+      );
+
+    return response.data.data;
+
+  };
+
+// ==========================================
+// Product Images
+// ==========================================
+
+export const getProductImages =
   async (productId) => {
 
     const response =
       await axios.get(
-        `${API_URL}/${productId}`
+        `http://localhost:5000/api/product-images/product/${productId}`
       );
 
-    return response.data;
+    return response.data.data.images;
+
   };
 
+// ==========================================
+// Product Variants
+// ==========================================
+
+export const getProductVariants =
+  async (productId) => {
+
+    const response =
+      await axios.get(
+        `http://localhost:5000/api/product-variants/product/${productId}`
+      );
+
+    return response.data.data.variants;
+
+  };

@@ -86,6 +86,53 @@ const productSchema =
   type: String,
   default: "",
 },
+shortDescription: {
+  type: String,
+  default: "",
+  trim: true,
+},
+
+tags: [
+  {
+    type: String,
+    trim: true,
+  },
+],
+
+seoTitle: {
+  type: String,
+  default: "",
+  trim: true,
+},
+
+seoDescription: {
+  type: String,
+  default: "",
+  trim: true,
+},
+
+seoSlug: {
+  type: String,
+  default: "",
+  trim: true,
+  lowercase: true,
+},
+
+preparationDays: {
+  type: Number,
+  default: 0,
+  min: 0,
+},
+
+careInstructions: {
+  type: String,
+  default: "",
+},
+
+isCustomizable: {
+  type: Boolean,
+  default: false,
+},
 
       newArrival: {
         type: Boolean,
