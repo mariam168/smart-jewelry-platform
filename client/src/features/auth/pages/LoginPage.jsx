@@ -7,7 +7,6 @@ import PasswordInput from "../components/PasswordInput";
 import AuthButton from "../components/AuthButton";
 
 import { loginUser } from "../services/authApi";
-
 import { useAuth } from "../context/AuthContext";
 
 const initialValues = {
@@ -36,10 +35,7 @@ const LoginPage = () => {
     useState(false);
 
   const handleChange = (event) => {
-    const {
-      name,
-      value,
-    } = event.target;
+    const { name, value } = event.target;
 
     setFormValues((previous) => ({
       ...previous,
@@ -59,22 +55,15 @@ const LoginPage = () => {
 
     const newErrors = {};
 
-    // Email validation
     if (!formValues.email.trim()) {
-      newErrors.email =
-        "Email is required";
+      newErrors.email = "Email is required";
     }
 
-    // Password validation
     if (!formValues.password) {
-      newErrors.password =
-        "Password is required";
+      newErrors.password = "Password is required";
     }
 
-    // Stop if validation errors exist
-    if (
-      Object.keys(newErrors).length > 0
-    ) {
+    if (Object.keys(newErrors).length > 0) {
       setErrors(newErrors);
       return;
     }
@@ -85,33 +74,50 @@ const LoginPage = () => {
       setErrors({});
       setServerError("");
 
-      // Call Login API
       const response =
         await loginUser(formValues);
 
-      // Save logged-in user
-      setUser(
-        response.data.user
-      );
+      console.log("LOGIN RESPONSE:");
+      console.log(response);
 
-      // Update authentication state
+      setUser(response.data.user);
+
+      console.log("User Saved");
+
       setIsAuthenticated(true);
 
-      // Redirect to account
-      navigate("/account");
+      console.log("Authenticated");
+
+      const role =
+        response.data.user.role.name;
+
+      console.log("ROLE:", role);
+
+      if (role === "admin") {
+        navigate("/admin");
+      } else {
+        navigate("/account");
+      }
+
+      console.log("Navigation Done");
 
     } catch (error) {
+
+      console.error("LOGIN ERROR:");
+      console.error(error);
+      console.error(error.response);
+      console.error(error.message);
+
       const data =
         error?.response?.data;
 
-      // Backend validation errors
       if (data?.errors) {
         setErrors(data.errors);
       } else {
-        // General backend error
         setServerError(
           data?.message ||
-            "Unable to login. Please try again."
+          error.message ||
+          "Unable to login. Please try again."
         );
       }
 
@@ -125,7 +131,6 @@ const LoginPage = () => {
       title="Welcome back"
       subtitle="Login to your Smart Jewelry account"
     >
-      {/* Server Error */}
       {serverError && (
         <div className="mb-6 rounded-lg border border-red-200 bg-red-50 p-4 text-sm text-red-600">
           {serverError}
@@ -136,7 +141,6 @@ const LoginPage = () => {
         onSubmit={handleSubmit}
         className="space-y-5"
       >
-        {/* Email */}
         <AuthInput
           label="Email"
           name="email"
@@ -148,7 +152,6 @@ const LoginPage = () => {
           required
         />
 
-        {/* Password */}
         <PasswordInput
           label="Password"
           name="password"
@@ -159,7 +162,6 @@ const LoginPage = () => {
           required
         />
 
-        {/* Forgot Password */}
         <div className="flex justify-end">
           <Link
             to="/forgot-password"
@@ -169,7 +171,6 @@ const LoginPage = () => {
           </Link>
         </div>
 
-        {/* Submit */}
         <AuthButton
           loading={isLoading}
           disabled={isLoading}
@@ -178,7 +179,6 @@ const LoginPage = () => {
         </AuthButton>
       </form>
 
-      {/* Register Link */}
       <p className="mt-6 text-center text-sm text-gray-600">
         Don't have an account?
 

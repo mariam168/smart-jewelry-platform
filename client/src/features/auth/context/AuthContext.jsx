@@ -10,50 +10,30 @@ import {
   logoutUser,
 } from "../services/authApi";
 
-const AuthContext =
-  createContext(null);
+const AuthContext = createContext(null);
 
-export const AuthProvider = ({
-  children,
-}) => {
-  const [
-    user,
-    setUser,
-  ] = useState(null);
+export const AuthProvider = ({ children }) => {
+  const [user, setUser] = useState(null);
 
-  const [
-    isLoading,
-    setIsLoading,
-  ] = useState(true);
+  const [isLoading, setIsLoading] = useState(true);
 
-  const [
-    isAuthenticated,
-    setIsAuthenticated,
-  ] = useState(false);
+  const [isAuthenticated, setIsAuthenticated] =
+    useState(false);
 
-  const loadCurrentUser =
-    async () => {
-      try {
-        const response =
-          await getCurrentUser();
+  const loadCurrentUser = async () => {
+    try {
+      const response = await getCurrentUser();
 
-        setUser(
-          response.data
-        );
+      setUser(response.data.user);
 
-        setIsAuthenticated(
-          true
-        );
-      } catch (error) {
-        setUser(null);
-
-        setIsAuthenticated(
-          false
-        );
-      } finally {
-        setIsLoading(false);
-      }
-    };
+      setIsAuthenticated(true);
+    } catch (error) {
+      setUser(null);
+      setIsAuthenticated(false);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   useEffect(() => {
     loadCurrentUser();
@@ -64,25 +44,20 @@ export const AuthProvider = ({
       await logoutUser();
     } finally {
       setUser(null);
-
-      setIsAuthenticated(
-        false
-      );
+      setIsAuthenticated(false);
     }
-  };
-
-  const value = {
-    user,
-    isLoading,
-    isAuthenticated,
-    setUser,
-    setIsAuthenticated,
-    logout,
   };
 
   return (
     <AuthContext.Provider
-      value={value}
+      value={{
+        user,
+        setUser,
+        isLoading,
+        isAuthenticated,
+        setIsAuthenticated,
+        logout,
+      }}
     >
       {children}
     </AuthContext.Provider>
@@ -90,10 +65,7 @@ export const AuthProvider = ({
 };
 
 export const useAuth = () => {
-  const context =
-    useContext(
-      AuthContext
-    );
+  const context = useContext(AuthContext);
 
   if (!context) {
     throw new Error(

@@ -4,7 +4,7 @@ import { RouterProvider } from "react-router-dom";
 
 import router from "./routes";
 
-import AuthProvider from "../context/AuthContext";
+import { AuthProvider } from "../features/auth/context/AuthContext";
 import CartProvider from "../context/CartContext";
 
 
