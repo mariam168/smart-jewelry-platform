@@ -8,7 +8,12 @@ import errorMiddleware from "./middleware/errorMiddleware.js";
 import orderRoutes from "./features/orders/routes/orderRoutes.js";
 import homeRoutes from "./features/home/routes/homeRoutes.js";
 import dashboardRoutes from "./features/admin/routes/dashboardRoutes.js";
-import adminAuthRoutes from "./features/admin/routes/adminRoutes.js";
+import technologyRoutes
+from "./features/catalog/routes/technologyRoutes.js";
+import technologyModelRoutes
+from "./features/catalog/routes/technologyModelRoutes.js";
+import productTechnologyRoutes
+from "./features/catalog/routes/productTechnologyRoutes.js";
 import path from "path";
 import uploadRoutes from "./routes/uploadRoutes.js";
 import productRoutes from "./features/catalog/routes/productRoutes.js";
@@ -76,6 +81,18 @@ productImageRoutes
 );
 app.use("/api/upload", uploadRoutes);
 
+app.use(
+"/api/technologies",
+technologyRoutes
+);
+app.use(
+"/api/technology-models",
+technologyModelRoutes
+);
+app.use(
+"/api/product-technologies",
+productTechnologyRoutes
+);
 app.use(
   "/uploads",
   express.static(path.join(process.cwd(), "uploads"))
@@ -147,15 +164,6 @@ app.use(
   homeRoutes
 );
 
-
-// ==========================================
-// ADMIN AUTH ROUTES
-// ==========================================
-
-app.use(
-  "/api/admin/auth",
-  adminAuthRoutes
-);
 
 
 // ==========================================

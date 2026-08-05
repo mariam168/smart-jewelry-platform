@@ -14,6 +14,10 @@ const menuItems = [
     path:
       "/admin",
   },
+   {
+    label: "Technologies",
+    path: "/admin/technologies",
+  },
 
 
   {

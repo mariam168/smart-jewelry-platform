@@ -38,17 +38,11 @@ const seedAuthData = async () => {
       });
 
       if (!permission) {
-        permission = await Permission.create(
-          permissionData
-        );
+        permission = await Permission.create(permissionData);
 
-        console.log(
-          `Permission created: ${permission.name}`
-        );
+        console.log(`Permission created: ${permission.name}`);
       } else {
-        console.log(
-          `Permission already exists: ${permission.name}`
-        );
+        console.log(`Permission already exists: ${permission.name}`);
       }
 
       permissions.push(permission);
@@ -63,15 +57,13 @@ const seedAuthData = async () => {
       customerRole = await Role.create({
         name: "customer",
         description: "Platform customer",
-        permissions: permissions.map(
-          (permission) => permission._id
-        ),
+        permissions: permissions.map((permission) => permission._id),
       });
 
       console.log("Customer role created");
     } else {
       customerRole.permissions = permissions.map(
-        (permission) => permission._id
+        (permission) => permission._id,
       );
 
       await customerRole.save();
@@ -79,7 +71,6 @@ const seedAuthData = async () => {
       console.log("Customer role updated");
     }
 
-    // Create admin role
     let adminRole = await Role.findOne({
       name: "admin",
     });
@@ -88,9 +79,7 @@ const seedAuthData = async () => {
       adminRole = await Role.create({
         name: "admin",
         description: "Platform administrator",
-        permissions: permissions.map(
-          (permission) => permission._id
-        ),
+        permissions: permissions.map((permission) => permission._id),
       });
 
       console.log("Admin role created");
@@ -104,10 +93,7 @@ const seedAuthData = async () => {
 
     process.exit(0);
   } catch (error) {
-    console.error(
-      "Auth Seed Error:",
-      error.message
-    );
+    console.error("Auth Seed Error:", error.message);
 
     await mongoose.connection.close();
 

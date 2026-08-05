@@ -1,4 +1,3 @@
-
 import User from "../models/User.js";
 import Customer from "../models/Customer.js";
 import Role from "../models/Role.js";
@@ -6,20 +5,11 @@ import Role from "../models/Role.js";
 // مهم جدًا: لازم يتسجل الموديل قبل استخدام populate
 import "../models/Permission.js";
 
-import {
-  hashPassword,
-  comparePassword,
-} from "../utils/password.js";
+import { hashPassword, comparePassword } from "../utils/password.js";
 
-import {
-  generateRandomToken,
-  hashToken,
-} from "../utils/token.js";
+import { generateRandomToken, hashToken } from "../utils/token.js";
 
-import {
-  generateAccessToken,
-} from "../utils/jwt.js";
-
+import { generateAccessToken } from "../utils/jwt.js";
 
 /**
  * =========================
@@ -35,19 +25,15 @@ export const registerCustomer = async ({
   privacyConsent,
   marketingConsent,
 }) => {
-  const normalizedEmail =
-    email.trim().toLowerCase();
+  const normalizedEmail = email.trim().toLowerCase();
 
   // Check existing user
-  const existingUser =
-    await User.findOne({
-      email: normalizedEmail,
-    });
+  const existingUser = await User.findOne({
+    email: normalizedEmail,
+  });
 
   if (existingUser) {
-    const error = new Error(
-      "An account with this email already exists"
-    );
+    const error = new Error("An account with this email already exists");
 
     error.statusCode = 409;
 
@@ -55,15 +41,12 @@ export const registerCustomer = async ({
   }
 
   // Find customer role
-  const customerRole =
-    await Role.findOne({
-      name: "customer",
-    });
+  const customerRole = await Role.findOne({
+    name: "customer",
+  });
 
   if (!customerRole) {
-    const error = new Error(
-      "Customer role was not found"
-    );
+    const error = new Error("Customer role was not found");
 
     error.statusCode = 500;
 
@@ -71,61 +54,34 @@ export const registerCustomer = async ({
   }
 
   // Hash password
-  const passwordHash =
-    await hashPassword(password);
+  const passwordHash = await hashPassword(password);
 
   // Generate verification token
-  const verificationToken =
-    generateRandomToken();
+  const verificationToken = generateRandomToken();
 
-  const verificationTokenHash =
-    hashToken(verificationToken);
+  const verificationTokenHash = hashToken(verificationToken);
 
-  const verificationExpiresAt =
-    new Date(
-      Date.now() +
-        24 *
-          60 *
-          60 *
-          1000
-    );
+  const verificationExpiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000);
 
   // Create user
-  const user =
-    await User.create({
-      email: normalizedEmail,
-
-      passwordHash,
-
-      role: customerRole._id,
-
-      emailVerificationTokenHash:
-        verificationTokenHash,
-
-      emailVerificationExpiresAt:
-        verificationExpiresAt,
-    });
+  const user = await User.create({
+    email: normalizedEmail,
+    passwordHash,
+    role: customerRole._id,
+    emailVerificationTokenHash: verificationTokenHash,
+    emailVerificationExpiresAt: verificationExpiresAt,
+  });
 
   try {
     // Create customer
-    const customer =
-      await Customer.create({
-        user: user._id,
-
-        firstName:
-          firstName.trim(),
-
-        lastName:
-          lastName.trim(),
-
-        phone:
-          phone?.trim() || "",
-
-        privacyConsent,
-
-        marketingConsent:
-          marketingConsent || false,
-      });
+    const customer = await Customer.create({
+      user: user._id,
+      firstName: firstName.trim(),
+      lastName: lastName.trim(),
+      phone: phone?.trim() || "",
+      privacyConsent,
+      marketingConsent: marketingConsent || false,
+    });
 
     return {
       user,
@@ -136,99 +92,74 @@ export const registerCustomer = async ({
     };
   } catch (error) {
     // Rollback user
-    await User.findByIdAndDelete(
-      user._id
-    );
+    await User.findByIdAndDelete(user._id);
 
     throw error;
   }
 };
-
 
 /**
  * =========================
  * VERIFY EMAIL
  * =========================
  */
-export const verifyEmail = async (
-  token
-) => {
+export const verifyEmail = async (token) => {
   if (!token) {
-    const error = new Error(
-      "Verification token is required"
-    );
+    const error = new Error("Verification token is required");
 
     error.statusCode = 400;
 
     throw error;
   }
 
-  const tokenHash =
-    hashToken(token);
+  const tokenHash = hashToken(token);
 
-  const user =
-    await User.findOne({
-      emailVerificationTokenHash:
-        tokenHash,
-
-      emailVerificationExpiresAt: {
-        $gt: new Date(),
-      },
-    });
+  const user = await User.findOne({
+    emailVerificationTokenHash: tokenHash,
+    emailVerificationExpiresAt: {
+      $gt: new Date(),
+    },
+  });
 
   if (!user) {
-    const error = new Error(
-      "Invalid or expired verification token"
-    );
+    const error = new Error("Invalid or expired verification token");
 
     error.statusCode = 400;
 
     throw error;
   }
 
-  user.emailVerifiedAt =
-    new Date();
+  user.emailVerifiedAt = new Date();
 
-  user.emailVerificationTokenHash =
-    null;
+  user.emailVerificationTokenHash = null;
 
-  user.emailVerificationExpiresAt =
-    null;
+  user.emailVerificationExpiresAt = null;
 
   await user.save();
 
   return user;
 };
 
-
 /**
  * =========================
  * LOGIN USER
  * =========================
  */
-export const loginUser = async ({
-  email,
-  password,
-}) => {
-  const normalizedEmail =
-    email.trim().toLowerCase();
+export const loginUser = async ({ email, password }) => {
+  const normalizedEmail = email.trim().toLowerCase();
 
-  const user =
-    await User.findOne({
-      email: normalizedEmail,
-    }).populate({
-      path: "role",
-
-      populate: {
-        path: "permissions",
-        model: "Permission",
-      },
-    });
+  const user = await User.findOne({
+    email: normalizedEmail,
+  }).populate({
+    path: "role",
+    populate: {
+      path: "permissions",
+      model: "Permission",
+    },
+  });
 
   if (!user) {
-    const error = new Error(
-      "Invalid email or password"
-    );
+    const error = new Error("Invalid email or password");
 
     error.statusCode = 401;
 
@@ -236,9 +167,7 @@ export const loginUser = async ({
   }
 
   if (!user.isActive) {
-    const error = new Error(
-      "Your account has been deactivated"
-    );
+    const error = new Error("Your account has been deactivated");
 
     error.statusCode = 403;
 
@@ -246,24 +175,16 @@ export const loginUser = async ({
   }
 
   // Check password
-  const isPasswordValid =
-    await comparePassword(
-      password,
-      user.passwordHash
-    );
+  const isPasswordValid = await comparePassword(password, user.passwordHash);
 
   if (!isPasswordValid) {
-    const error = new Error(
-      "Invalid email or password"
-    );
+    const error = new Error("Invalid email or password");
 
     error.statusCode = 401;
 
     throw error;
   }
 
-  // مؤقتًا لو أنتِ عايزة تلغي تفعيل الإيميل
-  // احذفي أو علقي الجزء ده
   /*
   if (!user.emailVerifiedAt) {
     const error = new Error(
@@ -276,72 +197,53 @@ export const loginUser = async ({
   }
   */
 
-  user.lastLoginAt =
-    new Date();
+  user.lastLoginAt = new Date();
 
   await user.save();
 
-  const accessToken =
-    generateAccessToken({
-      userId:
-        user._id.toString(),
-
-      role:
-        user.role.name,
-    });
+  const accessToken = generateAccessToken({
+    userId: user._id.toString(),
+    role: user.role.name,
+  });
 
   return {
     user,
-
     accessToken,
   };
 };
-
 
 /**
  * =========================
  * GET CURRENT USER
  * =========================
  */
-export const getCurrentUser =
-  async (userId) => {
-    const user =
-      await User.findById(
-        userId
-      )
-        .populate({
-          path: "role",
+export const getCurrentUser = async (userId) => {
+  const user = await User.findById(userId)
+    .populate({
+      path: "role",
+      populate: {
+        path: "permissions",
+        model: "Permission",
+      },
+    })
+    .select(
+      "-passwordHash -emailVerificationTokenHash -emailVerificationExpiresAt",
+    );
 
-          populate: {
-            path: "permissions",
+  if (!user) {
+    const error = new Error("User not found");
 
-            model: "Permission",
-          },
-        })
-        .select(
-          "-passwordHash " +
-          "-emailVerificationTokenHash " +
-          "-emailVerificationExpiresAt"
-        );
+    error.statusCode = 404;
 
-    if (!user) {
-      const error = new Error(
-        "User not found"
-      );
+    throw error;
+  }
 
-      error.statusCode = 404;
+  const customer = await Customer.findOne({
+    user: user._id,
+  });
 
-      throw error;
-    }
-
-    const customer =
-      await Customer.findOne({
-        user: user._id,
-      });
-
-    return {
-      user,
-
-      customer,
-    };
+  return {
+    user,
+    customer,
   };
+};

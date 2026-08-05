@@ -1,4 +1,3 @@
-
 import {
   registerCustomer,
   verifyEmail,
@@ -11,32 +10,14 @@ import {
   validateLoginInput,
 } from "../validation/authValidation.js";
 
-
-/**
- * =========================
- * REGISTER
- * =========================
- */
-export const register = async (
-  req,
-  res,
-  next
-) => {
+export const register = async (req, res, next) => {
   try {
-    const errors =
-      validateRegisterInput(
-        req.body
-      );
+    const errors = validateRegisterInput(req.body);
 
-    if (
-      Object.keys(errors).length > 0
-    ) {
+    if (Object.keys(errors).length > 0) {
       return res.status(400).json({
         success: false,
-
-        message:
-          "Please fix the validation errors",
-
+        message: "Please fix the validation errors",
         errors,
       });
     }
@@ -51,41 +32,28 @@ export const register = async (
       marketingConsent,
     } = req.body;
 
-    const result =
-      await registerCustomer({
-        firstName,
-        lastName,
-        email,
-        password,
-        phone,
-        privacyConsent,
-        marketingConsent,
-      });
+    const result = await registerCustomer({
+      firstName,
+      lastName,
+      email,
+      password,
+      phone,
+      privacyConsent,
+      marketingConsent,
+    });
 
     return res.status(201).json({
       success: true,
-
-      message:
-        "Account created successfully",
-
+      message: "Account created successfully",
       data: {
         user: {
-          id:
-            result.user._id,
-
-          email:
-            result.user.email,
+          id: result.user._id,
+          email: result.user.email,
         },
-
         customer: {
-          id:
-            result.customer._id,
-
-          firstName:
-            result.customer.firstName,
-
-          lastName:
-            result.customer.lastName,
+          id: result.customer._id,
+          firstName: result.customer.firstName,
+          lastName: result.customer.lastName,
         },
       },
     });
@@ -94,131 +62,61 @@ export const register = async (
   }
 };
 
-
-/**
- * =========================
- * VERIFY EMAIL
- * =========================
- */
-export const verifyEmailController =
-  async (
-    req,
-    res,
-    next
-  ) => {
-    try {
-      const {
-        token,
-      } = req.query;
-
-      const user =
-        await verifyEmail(token);
-
-      return res.status(200).json({
-        success: true,
-
-        message:
-          "Email verified successfully",
-
-        data: {
-          email:
-            user.email,
-
-          emailVerifiedAt:
-            user.emailVerifiedAt,
-        },
-      });
-    } catch (error) {
-      next(error);
-    }
-  };
-
-
-/**
- * =========================
- * LOGIN
- * =========================
- */
-export const login = async (
-  req,
-  res,
-  next
-) => {
+export const verifyEmailController = async (req, res, next) => {
   try {
-    const errors =
-      validateLoginInput(
-        req.body
-      );
+    const { token } = req.query;
 
-    if (
-      Object.keys(errors).length > 0
-    ) {
+    const user = await verifyEmail(token);
+
+    return res.status(200).json({
+      success: true,
+      message: "Email verified successfully",
+      data: {
+        email: user.email,
+        emailVerifiedAt: user.emailVerifiedAt,
+      },
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const login = async (req, res, next) => {
+  try {
+    const errors = validateLoginInput(req.body);
+
+    if (Object.keys(errors).length > 0) {
       return res.status(400).json({
         success: false,
-
-        message:
-          "Please fix the validation errors",
-
+        message: "Please fix the validation errors",
         errors,
       });
     }
 
-    const {
+    const { email, password } = req.body;
+
+    const result = await loginUser({
       email,
       password,
-    } = req.body;
+    });
 
-    const result =
-      await loginUser({
-        email,
-        password,
-      });
-
-    res.cookie(
-      "accessToken",
-      result.accessToken,
-      {
-        httpOnly: true,
-
-        secure:
-          process.env.NODE_ENV ===
-          "production",
-
-        sameSite:
-          process.env.NODE_ENV ===
-          "production"
-            ? "none"
-            : "lax",
-
-        maxAge:
-          7 *
-          24 *
-          60 *
-          60 *
-          1000,
-      }
-    );
+    res.cookie("accessToken", result.accessToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
+      maxAge: 7 * 24 * 60 * 60 * 1000,
+    });
 
     return res.status(200).json({
       success: true,
-
-      message:
-        "Logged in successfully",
-
+      message: "Logged in successfully",
       data: {
         user: {
-          id:
-            result.user._id,
-
-          email:
-            result.user.email,
-
+          id: result.user._id,
+          email: result.user.email,
           role: {
-            id:
-              result.user.role._id,
-
-            name:
-              result.user.role.name,
+            id: result.user.role._id,
+            name: result.user.role.name,
           },
         },
       },
@@ -227,86 +125,36 @@ export const login = async (
     next(error);
   }
 };
-
-
-/**
- * =========================
- * GET ME
- * =========================
- */
-export const getMe = async (
-  req,
-  res,
-  next
-) => {
+export const getMe = async (req, res, next) => {
   try {
-    const result =
-      await getCurrentUser(
-        req.user.userId
-      );
+    const result = await getCurrentUser(req.user.userId);
 
     return res.status(200).json({
       success: true,
-
       data: {
         user: {
-          id:
-            result.user._id,
-
-          email:
-            result.user.email,
-
-          role:
-            result.user.role,
-
-          isActive:
-            result.user.isActive,
-
-          emailVerifiedAt:
-            result.user
-              .emailVerifiedAt,
+          id: result.user._id,
+          email: result.user.email,
+          role: result.user.role,
+          isActive: result.user.isActive,
+          emailVerifiedAt: result.user.emailVerifiedAt,
         },
-
-        customer:
-          result.customer,
+        customer: result.customer,
       },
     });
   } catch (error) {
     next(error);
   }
 };
-
-
-/**
- * =========================
- * LOGOUT
- * =========================
- */
-export const logout = (
-  req,
-  res
-) => {
-  res.clearCookie(
-    "accessToken",
-    {
-      httpOnly: true,
-
-      secure:
-        process.env.NODE_ENV ===
-        "production",
-
-      sameSite:
-        process.env.NODE_ENV ===
-        "production"
-          ? "none"
-          : "lax",
-    }
-  );
+export const logout = (req, res) => {
+  res.clearCookie("accessToken", {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
+  });
 
   return res.status(200).json({
     success: true,
-
-    message:
-      "Logged out successfully",
+    message: "Logged out successfully",
   });
 };

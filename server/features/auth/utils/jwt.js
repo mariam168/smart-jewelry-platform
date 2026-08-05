@@ -1,9 +1,6 @@
 import jwt from "jsonwebtoken";
 
-export const generateAccessToken = ({
-  userId,
-  role,
-}) => {
+export const generateAccessToken = ({ userId, role }) => {
   return jwt.sign(
     {
       userId,
@@ -11,17 +8,11 @@ export const generateAccessToken = ({
     },
     process.env.JWT_SECRET,
     {
-      expiresIn:
-        process.env.JWT_EXPIRES_IN || "7d",
-    }
+      expiresIn: process.env.JWT_EXPIRES_IN || "7d",
+    },
   );
 };
 
-export const verifyAccessToken = (
-  token
-) => {
-  return jwt.verify(
-    token,
-    process.env.JWT_SECRET
-  );
+export const verifyAccessToken = (token) => {
+  return jwt.verify(token, process.env.JWT_SECRET);
 };

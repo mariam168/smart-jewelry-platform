@@ -6,12 +6,6 @@ export const hashPassword = async (password) => {
   return await bcrypt.hash(password, SALT_ROUNDS);
 };
 
-export const comparePassword = async (
-  password,
-  passwordHash
-) => {
-  return await bcrypt.compare(
-    password,
-    passwordHash
-  );
+export const comparePassword = async (password, passwordHash) => {
+  return await bcrypt.compare(password, passwordHash);
 };

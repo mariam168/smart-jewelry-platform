@@ -1,27 +1,17 @@
+import { verifyAccessToken } from "../utils/jwt.js";
 
-import {
-  verifyAccessToken,
-} from "../utils/jwt.js";
-
-export const protect = (
-  req,
-  res,
-  next
-) => {
+export const protect = (req, res, next) => {
   try {
-    const token =
-      req.cookies?.accessToken;
+    const token = req.cookies?.accessToken;
 
     if (!token) {
       return res.status(401).json({
         success: false,
-        message:
-          "Authentication required",
+        message: "Authentication required",
       });
     }
 
-    const decoded =
-      verifyAccessToken(token);
+    const decoded = verifyAccessToken(token);
 
     req.user = decoded;
 
@@ -29,8 +19,7 @@ export const protect = (
   } catch (error) {
     return res.status(401).json({
       success: false,
-      message:
-        "Invalid or expired authentication token",
+      message: "Invalid or expired authentication token",
     });
   }
 };

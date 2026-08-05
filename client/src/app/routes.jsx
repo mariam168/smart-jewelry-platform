@@ -39,6 +39,10 @@ import AdminCategoriesPage from "../features/admin/pages/AdminCategoriesPage";
 import AddCategoryPage from "../features/admin/pages/AddCategoryPage";
 import EditCategoryPage from "../features/admin/pages/EditCategoryPage";
 
+import AdminTechnologiesPage from "../features/admin/pages/AdminTechnologiesPage";
+import AddTechnologyPage from "../features/admin/pages/AddTechnologyPage";
+import EditTechnologyPage from "../features/admin/pages/EditTechnologyPage";
+
 import AdminOrdersPage from "../features/admin/pages/AdminOrdersPage";
 import AdminOrderDetailsPage from "../features/admin/pages/AdminOrderDetailsPage";
 
@@ -179,6 +183,20 @@ const router = createBrowserRouter([
             path: "categories/:id/edit",
             element: <EditCategoryPage />,
           },
+          {
+  path: "technologies",
+  element: <AdminTechnologiesPage />,
+},
+
+{
+  path: "technologies/new",
+  element: <AddTechnologyPage />,
+},
+
+{
+  path: "technologies/:id/edit",
+  element: <EditTechnologyPage />,
+},
 
           {
             path: "orders",

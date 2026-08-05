@@ -3,8 +3,7 @@ import nodemailer from "nodemailer";
 const transporter = nodemailer.createTransport({
   host: process.env.SMTP_HOST,
   port: Number(process.env.SMTP_PORT),
-  secure:
-    process.env.SMTP_SECURE === "true",
+  secure: process.env.SMTP_SECURE === "true",
 
   auth: {
     user: process.env.SMTP_USER,
@@ -12,20 +11,15 @@ const transporter = nodemailer.createTransport({
   },
 });
 
-export const sendVerificationEmail = async ({
-  email,
-  verificationToken,
-}) => {
-  const verificationUrl =
-    `${process.env.CLIENT_URL}/verify-email?token=${verificationToken}`;
+export const sendVerificationEmail = async ({ email, verificationToken }) => {
+  const verificationUrl = `${process.env.CLIENT_URL}/verify-email?token=${verificationToken}`;
 
   await transporter.sendMail({
     from: process.env.EMAIL_FROM,
 
     to: email,
 
-    subject:
-      "Verify your Smart Jewelry account",
+    subject: "Verify your Smart Jewelry account",
 
     html: `
       <div style="font-family: Arial, sans-serif; max-width: 600px; margin: auto;">
