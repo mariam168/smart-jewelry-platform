@@ -18,6 +18,10 @@ const menuItems = [
     label: "Technologies",
     path: "/admin/technologies",
   },
+  {
+    label: "Smart Units",
+    path: "/admin/smart-units",
+  },
 
 
   {

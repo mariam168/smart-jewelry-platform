@@ -20,13 +20,24 @@ const productSchema =
         ref: "Category",
         required: true,
       },
+      technologies: [
+  {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Technology",
+  },
+],
 
       // الصورة الرئيسية
       image: {
         type: String,
         default: "",
       },
-
+smartUnits: [
+  {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "SmartUnit",
+  },
+],
       // معرض الصور
       images: [
         {

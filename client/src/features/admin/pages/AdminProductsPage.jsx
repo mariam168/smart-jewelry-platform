@@ -184,7 +184,12 @@ const AdminProductsPage = () => {
                     <th className="px-6 py-4 text-left">
                       Category
                     </th>
-
+                    <th className="px-6 py-4 text-left">
+  Technologies
+</th>
+<th className="px-6 py-4 text-left">
+  Smart Units
+</th>
                     <th className="px-6 py-4 text-left">
                       Price
                     </th>
@@ -261,6 +266,70 @@ const AdminProductsPage = () => {
                         {product.category?.name}
 
                       </td>
+                      <td className="px-6 py-4">
+
+  {product.technologies?.length > 0 ? (
+
+    <div className="flex flex-wrap gap-2">
+
+      {product.technologies.map((technology) => (
+
+        <span
+          key={technology._id}
+          className="rounded-full bg-blue-100 px-3 py-1 text-xs font-medium text-blue-700"
+        >
+
+          {technology.name}
+
+        </span>
+
+      ))}
+
+    </div>
+
+  ) : (
+
+    <span className="text-gray-400">
+
+      No Technologies
+
+    </span>
+
+  )}
+
+</td>
+<td className="px-6 py-4">
+
+  {product.smartUnits?.length > 0 ? (
+
+    <div className="flex flex-wrap gap-2">
+
+      {product.smartUnits.map((smartUnit) => (
+
+        <span
+          key={smartUnit._id}
+          className="rounded-full bg-purple-100 px-3 py-1 text-xs font-medium text-purple-700"
+        >
+
+          {smartUnit.name}
+
+        </span>
+
+      ))}
+
+    </div>
+
+  ) : (
+
+    <span className="text-gray-400">
+
+      No Smart Units
+
+    </span>
+
+  )}
+
+</td>
 
                       <td className="px-6 py-4">
 

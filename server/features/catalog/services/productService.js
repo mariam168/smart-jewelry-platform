@@ -33,8 +33,10 @@ export const createProduct = async (productData) => {
 export const getAllProducts = async () => {
 
   const products = await Product.find()
-    .populate("category")
-    .sort({ createdAt: -1 });
+  .populate("category")
+.populate("technologies")
+.populate("smartUnits")
+  .sort({ createdAt: -1 });
 
   const result = await Promise.all(
 
@@ -68,8 +70,9 @@ export const getAllProducts = async () => {
 export const getProductById = async (productId) => {
 
   const product = await Product.findById(productId)
-    .populate("category");
-
+  .populate("category")
+.populate("technologies")
+.populate("smartUnits")
   if (!product) {
 
     return null;

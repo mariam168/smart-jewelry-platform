@@ -18,7 +18,9 @@ import {
 import {
   getCategories,
 } from "../services/categoryApi";
-
+import {
+  getTechnologies,
+} from "../services/technologyApi";
 
 const EditProductPage = () => {
 
@@ -74,21 +76,25 @@ const EditProductPage = () => {
 
       try {
 
-        const [
-          categoriesResponse,
-          productResponse,
-        ] = await Promise.all([
+       const [
+  categoriesResponse,
+  technologiesResponse,
+  productResponse,
+] = await Promise.all([
 
-          getCategories(),
+  getCategories(),
 
-          getProduct(id),
+  getTechnologies(),
 
-        ]);
+  getProduct(id),
+
+]);
 
 
         const categoriesData =
           categoriesResponse.data.categories;
-
+        const technologiesData =
+  technologiesResponse.data.technologies;
 
         const product =
           productResponse.data.product;
@@ -97,6 +103,18 @@ const EditProductPage = () => {
         setCategories(
           categoriesData
         );
+        setTechnologies(
+  technologiesData
+);
+        const [
+  technologies,
+  setTechnologies,
+] = useState([]);
+
+const [
+  selectedTechnologies,
+  setSelectedTechnologies,
+] = useState([]);
 
 
         setFormData({
@@ -176,6 +194,31 @@ const EditProductPage = () => {
     );
 
   };
+  const handleTechnologyChange = (id) => {
+
+  setSelectedTechnologies((previous) =>
+
+    previous.includes(id)
+
+      ? previous.filter(
+          technologyId =>
+            technologyId !== id
+        )
+
+      : [...previous, id]
+
+  );
+
+};
+  setSelectedTechnologies(
+
+  product.technologies?.map(
+
+    technology => technology._id
+
+  ) || []
+
+);
 
 
   // =========================================
@@ -202,6 +245,7 @@ const EditProductPage = () => {
         {
 
           name:
+          
             formData.name,
 
           description:
@@ -209,7 +253,7 @@ const EditProductPage = () => {
 
           category:
             formData.category,
-
+    technologies:selectedTechnologies,
           price:
             Number(
               formData.price
@@ -482,6 +526,44 @@ const EditProductPage = () => {
 
             </div>
 
+<div className="rounded-xl border p-6">
+
+  <h2 className="mb-4 text-lg font-semibold">
+
+    Technologies
+
+  </h2>
+
+  <div className="grid grid-cols-2 gap-4">
+
+    {technologies.map((technology) => (
+
+      <label
+        key={technology._id}
+        className="flex items-center gap-3"
+      >
+
+        <input
+          type="checkbox"
+          checked={selectedTechnologies.includes(
+            technology._id
+          )}
+          onChange={() =>
+            handleTechnologyChange(
+              technology._id
+            )
+          }
+        />
+
+        {technology.name}
+
+      </label>
+
+    ))}
+
+  </div>
+
+</div>
 
             {/* Price + Stock */}
 

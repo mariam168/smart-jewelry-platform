@@ -10,6 +10,8 @@ import homeRoutes from "./features/home/routes/homeRoutes.js";
 import dashboardRoutes from "./features/admin/routes/dashboardRoutes.js";
 import technologyRoutes
 from "./features/catalog/routes/technologyRoutes.js";
+import smartUnitRoutes
+from "./features/catalog/routes/smartUnitRoutes.js";
 import technologyModelRoutes
 from "./features/catalog/routes/technologyModelRoutes.js";
 import productTechnologyRoutes
@@ -117,6 +119,10 @@ app.get(
 app.use(
 "/api/product-variants",
 productVariantRoutes
+);
+app.use(
+  "/api/smart-units",
+  smartUnitRoutes
 );
 
 // ==========================================

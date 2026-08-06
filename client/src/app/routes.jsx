@@ -43,6 +43,10 @@ import AdminTechnologiesPage from "../features/admin/pages/AdminTechnologiesPage
 import AddTechnologyPage from "../features/admin/pages/AddTechnologyPage";
 import EditTechnologyPage from "../features/admin/pages/EditTechnologyPage";
 
+import AdminSmartUnitsPage from "../features/admin/smart-units/pages/AdminSmartUnitsPage";
+import AddSmartUnitPage from "../features/admin/smart-units/pages/AddSmartUnitPage";
+import EditSmartUnitPage from "../features/admin/smart-units/pages/EditSmartUnitPage";
+
 import AdminOrdersPage from "../features/admin/pages/AdminOrdersPage";
 import AdminOrderDetailsPage from "../features/admin/pages/AdminOrderDetailsPage";
 
@@ -196,6 +200,20 @@ const router = createBrowserRouter([
 {
   path: "technologies/:id/edit",
   element: <EditTechnologyPage />,
+},
+{
+  path: "smart-units",
+  element: <AdminSmartUnitsPage />,
+},
+
+{
+  path: "smart-units/new",
+  element: <AddSmartUnitPage />,
+},
+
+{
+  path: "smart-units/:id/edit",
+  element: <EditSmartUnitPage />,
 },
 
           {

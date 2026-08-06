@@ -7,14 +7,18 @@ import {
   Link,
   useNavigate,
 } from "react-router-dom";
-
+import {
+  getTechnologies,
+} from "../services/technologyApi";
 import {
   createProduct,
   uploadImage,
   createProductImage,
   updateProduct,
 } from "../services/productApi";
-
+import {
+  getSmartUnits,
+} from "../smart-units/services/smartUnitApi";
 import {
   getCategories,
 } from "../services/categoryApi";
@@ -25,7 +29,19 @@ const AddProductPage = () => {
 
   const [categories, setCategories] =
     useState([]);
+  const [technologies, setTechnologies] =
+  useState([]);
+const [
+  smartUnits,
+  setSmartUnits,
+] = useState([]);
 
+const [
+  selectedSmartUnits,
+  setSelectedSmartUnits,
+] = useState([]);
+const [selectedTechnologies, setSelectedTechnologies] =
+  useState([]);
   const [images, setImages] =
     useState([]);
 
@@ -78,44 +94,99 @@ const [formData, setFormData] = useState({
   const [error, setError] =
     useState("");
 
-  useEffect(() => {
+useEffect(() => {
+const loadCategories = async () => {
 
-    const loadCategories =
-      async () => {
+  try {
 
-        try {
+    const response = await getCategories();
 
-          const response =
-            await getCategories();
+    console.log("Category Response:", response);
 
-          const data =
-            response.data.categories;
+    let data = [];
 
-          setCategories(data);
+    if (response.data?.categories) {
 
-          if (data.length > 0) {
+      data = response.data.categories;
 
-            setFormData(previous => ({
+    } else if (response.categories) {
 
-              ...previous,
+      data = response.categories;
 
-              category: data[0]._id,
+    } else if (Array.isArray(response)) {
 
-            }));
+      data = response;
 
-          }
+    }
 
-        } catch (error) {
+    console.log("Loaded Categories:", data);
 
-          console.error(error);
+    setCategories(data);
 
-        }
+    if (data.length > 0) {
 
-      };
+      setFormData(previous => ({
 
-    loadCategories();
+        ...previous,
 
-  }, []);
+        category: data[0]._id,
+
+      }));
+
+    }
+
+  } catch (error) {
+
+    console.error(error);
+
+  }
+
+};
+const loadTechnologies = async () => {
+
+  try {
+
+    const response = await getTechnologies();
+
+    console.log(response);
+
+    setTechnologies(
+      response.data.technologies || []
+    );
+
+  } catch (error) {
+
+    console.error(error);
+
+    setTechnologies([]);
+
+  }
+
+};
+const loadSmartUnits = async () => {
+
+  try {
+
+    const response = await getSmartUnits();
+
+    setSmartUnits(
+      response.data.smartUnits || []
+    );
+
+  } catch (error) {
+
+    console.error(error);
+
+    setSmartUnits([]);
+
+  }
+
+};
+  loadCategories();
+
+  loadTechnologies();
+loadSmartUnits();
+}, []);
 
   const handleChange = (event) => {
 
@@ -169,7 +240,8 @@ const [formData, setFormData] = useState({
       setIsLoading(true);
 
       try {
-
+console.log(formData);
+console.log("Category:", formData.category);
         const productResponse =
        await createProduct({
 
@@ -183,6 +255,10 @@ const [formData, setFormData] = useState({
 
   category:
     formData.category,
+ technologies:
+    selectedTechnologies,
+    smartUnits:
+  selectedSmartUnits,
 
   price:
     Number(formData.price),
@@ -338,6 +414,38 @@ const [formData, setFormData] = useState({
       }
 
     };
+    const handleSmartUnitChange = (id) => {
+
+  setSelectedSmartUnits((previous) =>
+
+    previous.includes(id)
+
+      ? previous.filter(
+          smartUnitId =>
+            smartUnitId !== id
+        )
+
+      : [...previous, id]
+
+  );
+
+};
+    const handleTechnologyChange = (id) => {
+
+  setSelectedTechnologies((previous) =>
+
+    previous.includes(id)
+
+      ? previous.filter(
+          technologyId =>
+            technologyId !== id
+        )
+
+      : [...previous, id]
+
+  );
+
+};
       return (
 
     <div className="min-h-screen bg-gray-50">
@@ -478,26 +586,119 @@ const [formData, setFormData] = useState({
                 Category
               </label>
 
-              <select
-                name="category"
-                value={formData.category}
-                onChange={handleChange}
-                className="w-full rounded-lg border px-4 py-3"
-              >
+             <select
+  name="category"
+  value={formData.category}
+  onChange={handleChange}
+  className="w-full rounded-lg border px-4 py-3"
+>
 
-                {categories.map(category => (
+  <option value="">
+    Select Category
+  </option>
 
-                  <option
-                    key={category._id}
-                    value={category._id}
-                  >
-                    {category.name}
-                  </option>
+  {categories.map((category) => (
 
-                ))}
+    <option
+      key={category._id}
+      value={category._id}
+    >
+      {category.name}
+    </option>
 
-              </select>
+  ))}
 
+</select>
+           <div className="rounded-xl border p-6">
+
+  <h2 className="mb-4 text-lg font-semibold">
+
+    Technologies
+
+  </h2>
+
+  <div className="grid grid-cols-2 gap-4">
+
+    {technologies.map((technology) => (
+
+      <label
+        key={technology._id}
+        className="flex items-center gap-3"
+      >
+
+        <input
+          type="checkbox"
+          checked={selectedTechnologies.includes(
+            technology._id
+          )}
+          onChange={() =>
+            handleTechnologyChange(
+              technology._id
+            )
+          }
+        />
+
+        {technology.name}
+
+      </label>
+
+    ))}
+
+  </div>
+
+</div>
+<div className="rounded-xl border p-6">
+
+  <h2 className="mb-4 text-lg font-semibold">
+
+    Smart Units
+
+  </h2>
+
+  <div className="grid grid-cols-2 gap-4">
+
+    {smartUnits.map((smartUnit) => (
+
+      <label
+        key={smartUnit._id}
+        className="flex items-center gap-3"
+      >
+
+        <input
+          type="checkbox"
+          checked={selectedSmartUnits.includes(
+            smartUnit._id
+          )}
+          onChange={() =>
+            handleSmartUnitChange(
+              smartUnit._id
+            )
+          }
+        />
+
+        <div>
+
+          <div className="font-medium">
+
+            {smartUnit.name}
+
+          </div>
+
+          <div className="text-sm text-gray-500">
+
+            +{smartUnit.price} EGP
+
+          </div>
+
+        </div>
+
+      </label>
+
+    ))}
+
+  </div>
+
+</div>
             </div>
 
             <div className="grid grid-cols-2 gap-6">
